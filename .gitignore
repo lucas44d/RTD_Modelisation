@@ -1,0 +1,30 @@
+# Environnement virtuel
+.venv/
+venv/
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Fichiers compilés
+*.pyd
+*.so
+
+# Distribution
+build/
+dist/
+*.egg-info/
+
+# Fichiers temporaires
+*.log
+*.tmp
+
+# VS Code
+.vscode/
+
+# Variables d'environnement
+.env
+
+# Jupyter
+.ipynb_checkpoints/
