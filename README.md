@@ -77,10 +77,19 @@ Commit the updated `requirements.txt` so that other users can install the same e
 1. Pull the latest changes from the `main` branch.
 2. Create a new development branch for your feature or bug fix.
 
+
+If a dev branch isn't created yet :
 ```bash
 git checkout main
 git pull
 git checkout -b dev
+```
+
+If a dev branch is already created :
+```bash
+git checkout main
+git pull
+git checkout dev
 ```
 
 3. Develop and test your changes.
@@ -99,5 +108,4 @@ git push -u origin dev
 
 7. Open a Pull Request (Merge Request) from your development branch into `main` in github.
 8. Review the changes, resolve any comments if necessary, and merge the Pull Request.
-9. Delete the development branch once it has been merged (the dev branch will be removed automatically).
-10. Go back to step one
+9. Go back to step one
