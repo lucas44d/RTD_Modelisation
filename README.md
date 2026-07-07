@@ -80,24 +80,24 @@ Commit the updated `requirements.txt` so that other users can install the same e
 ```bash
 git checkout main
 git pull
-git checkout -b feature/my-feature
+git checkout -b dev
 ```
 
-3. Activate the virtual environment.
-4. Develop and test your changes.
-5. Commit your work regularly with meaningful commit messages.
+3. Develop and test your changes.
+4. Commit your work regularly with meaningful commit messages.
 
 ```bash
 git add .
 git commit -m "Implement feature X"
 ```
 
-6. Push your branch to GitHub.
+5. Push your branch to GitHub.
 
 ```bash
-git push -u origin feature/my-feature
+git push -u origin dev
 ```
 
-7. Open a Pull Request (Merge Request) from your development branch into `main`.
+7. Open a Pull Request (Merge Request) from your development branch into `main` in github.
 8. Review the changes, resolve any comments if necessary, and merge the Pull Request.
-9. Delete the development branch once it has been merged.
+9. Delete the development branch once it has been merged (the dev branch will be removed automatically).
+10. Go back to step one
