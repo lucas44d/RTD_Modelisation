@@ -108,4 +108,4 @@ git push -u origin dev
 
 7. Open a Pull Request (Merge Request) from your development branch into `main` in github.
 8. Review the changes, resolve any comments if necessary, and merge the Pull Request.
-9. Go back to step one
+9. GRepeat step one and two before developping another function
