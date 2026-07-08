@@ -81,7 +81,7 @@ Commit the updated `requirements.txt` so that other users can install the same e
 If a dev branch isn't created yet :
 ```bash
 git checkout main
-git pull
+git pull origin main
 git checkout -b dev
 ```
 
@@ -108,4 +108,4 @@ git push -u origin dev
 
 7. Open a Pull Request (Merge Request) from your development branch into `main` in github.
 8. Review the changes, resolve any comments if necessary, and merge the Pull Request.
-9. GRepeat step one and two before developping another function
+9. Go back to step one

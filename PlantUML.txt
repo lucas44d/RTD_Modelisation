@@ -1,0 +1,93 @@
+@startuml
+
+class System {
+    -reactors
+    -pumps
+    -conditions
+    +add_reactor()
+    +add_pump()
+    +simulate()
+}
+
+class Reactor {
+    name
+    volume_ml
+    agitation_rpm
+    set_volume()
+    set_agitation()
+    mixing_factor()
+}
+
+class Pump{
+    name
+    flow_rate
+    activate
+    set_flow()
+    get_flow
+}
+
+class OperatingConditions{
+    pH
+    viscosity
+    density
+    temperature
+}
+
+class Simulation{
+    particles
+    current_time
+    dt
+    intialize()
+    step()
+    run()
+}
+
+class Particle{
+    id
+    diameter
+    density
+    position
+    velocity
+    residence_time
+    move()
+    sedimentation()
+    buoyancy()
+}
+
+class RTD{
+    residence_times
+    E_t
+    F_t
+    compute_E()
+    compute_F()
+    mean_time()
+    variance()
+}
+
+class Plots{
+    plot_histogram()
+    plot_E()
+    plot_F()
+    plot_trajectories()
+}
+
+class GUI{
+    buttons
+    parameters
+    launch_simulation()
+    update_plots()
+}
+
+
+System --> Simulation : used by
+
+System o-- Reactor
+System o-- Pump
+System o-- OperatingConditions
+
+Simulation --> Particle : update
+Particle --> RTD
+RTD --> Plots
+GUI --> Plots
+
+@enduml
