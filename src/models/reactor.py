@@ -7,6 +7,10 @@ On distingue deux familles de réacteurs, conformément aux hypothèses :
 - Réacteurs tubulaires à volume fixe : R3 (Duodénum), R4 (Jéjunum),
   R5 (Iléon / Stomie). Conformément à l'hypothèse de régime permanent dans la partie tubulaire,
   leur volume est constant et calculé à partir de leur géométrie interne (longueur, diamètre interne).
+
+Note : Il est mentionné dans le CDC un diamètre interne 1/4 de pouce pour les tubulures de racords de plusieurs pompes, 
+doit-on prendre en compte ce diamètre pour le calcul du volume total du système ? 
+Si oui -> Quelle est la longueur de ces tubulures ? (pas trouvé dans le cdc)  
 """
 
 from __future__ import annotations
@@ -153,15 +157,17 @@ class StomachReactor(StirredReactor):
             min_agitation_volume_ml=self.MIN_STIRRER_VOLUME_ML,
         )
 
+    """Relation d'agitation du barreau magnétique de R1"""
     def magnetic_stirrer_status(self) -> StirrerStatus:
-        """Barreau magnétique de R1"""
+        """Si le volume < 50ml, l'agitation est arretée : on retourne état stopped"""
         if self._volume_ml < self.MIN_STIRRER_VOLUME_ML:
             return StirrerStatus(0.0, AgitationState.STOPPED)
         rpm = 0.5 * self._volume_ml + 200.0
         return StirrerStatus(rpm, AgitationState.RUNNING)
-
+    
+    """Relation d'agitation de l'agitateur à pale de R1"""
     def paddle_stirrer_status(self) -> StirrerStatus:
-        """Agitateur à pale de R1 : 60 rpm, arrêté < 100 mL"""
+        """Si le volume < 100ml, l'agitation est arretée : on retourne état stopped"""
         if self._volume_ml < self.MIN_PADDLE_AND_SYRINGE_VOLUME_ML:
             return StirrerStatus(0.0, AgitationState.STOPPED)
         return StirrerStatus(self.PADDLE_RPM, AgitationState.RUNNING)
@@ -197,6 +203,7 @@ class PreduodenumReactor(StirredReactor):
             min_agitation_volume_ml=self.MIN_STIRRER_VOLUME_ML,
         )
 
+    """Relation d'agitation du barreau magnétique de R2"""
     def magnetic_stirrer_status(self) -> StirrerStatus:
         if not self.is_agitation_active:
             return StirrerStatus(0.0, AgitationState.STOPPED)
@@ -223,6 +230,6 @@ class IleonReactor(TubularReactor):
 
 
 class StomieReactor(TubularReactor):
-    """R5 - Stomie (configuration alternative) : L = 12.5 pi, d_int = 3/8 po"""
+    """R5 - Stomie : L = 12.5 pi, d_int = 3/8 po"""
     def __init__(self):
         super().__init__("R5 - Stomie", length_ft=12.5, inner_diameter_in=3 / 8)
