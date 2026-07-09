@@ -88,7 +88,7 @@ git checkout -b dev
 If a dev branch is already created :
 ```bash
 git checkout main
-git pull
+git pull origin main
 git checkout dev
 ```
 

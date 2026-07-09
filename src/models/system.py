@@ -13,7 +13,7 @@ from .reactor import (
     StomieReactor,
 )
 from .pump import SyringePump, ReciprocatingPump
-
+from .operating_conditions import OperatingConditions
 
 class DigestionSystem:
     """Représente le système de digestion in vitro dynamique (IViDiS)"""
@@ -29,6 +29,7 @@ class DigestionSystem:
 
         self.syringe_pump = SyringePump()
         self.reciprocating_pump_t3 = ReciprocatingPump()
+        self.conditions = OperatingConditions()  # Conditions de fonctionnement du système IViDiS
 
     @property
     def reactors(self):
@@ -39,6 +40,11 @@ class DigestionSystem:
             self.r4_jejunum,
             self.r5_ileon_or_stomie,
         ]
+
+
+
+
+    """Fonctions pour retourner des infos sur le système complet à un instant donné"""
 
     def total_volume(self) -> float:
         """Volume total instantané du système (mL), somme de tous les réacteurs"""
