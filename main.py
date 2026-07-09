@@ -16,6 +16,8 @@
 # )
 
 from src.models.system import DigestionSystem
+from src.models.pump import build_transfer_pumps, build_digestive_solution_pumps, hms_to_seconds
+
 
 def main():
     system = DigestionSystem()
@@ -33,6 +35,28 @@ def main():
     print("\nAgitation à T=0s :")
     for name, status in system.agitation_summary(t_s=0.0, t_in_syringe_cycle_s=0.0).items():
         print(f"  {name}: {status}")
+
+#Conditions Opératoires (incrément 1.3)
+    print("\nConditions opératoires du système IViDiS :")
+    print(system.operating_conditions)
+
+#Débits des pompes de dosage et de transfert (incrément 1.4)
+    all_ok = True #Variable qui permet de valdier le débit des pompes
+    for name, pump in {**system.digestive_pumps, **system.transfer_pumps}.items():
+        ok = pump.validate_against_expected()
+        all_ok &= ok
+        print(f" {name}: {'OK' if ok else 'ECHEC'} (volume total attendu = {pump.total_expected_volume_ml():.2f} ml)")
+    print(f"\n -> Toutes les pompes cohérentes avec le CDC : {all_ok}")
+
+    print("\n Débits à t = 00:20:00 (1200s)")
+    t = hms_to_seconds("00:20:00")
+    for name, rate in system.flow_rates_summary(t).items():
+        if rate > 0:
+            print(f"  {name}: {rate:.2f} mL/min")
+
+    print("\n Volume cumulé délivré par T1 à t = 00:30:00 (1800s)")
+    t2 = hms_to_seconds("00:30:00")
+    print(f" T1 : {system.transfer_pumps['T1'].cumulative_volume_at(t2):.2f} ml")
 
 #Test seuils d'arrêt pour les réacteurs (R1 et R2)
     print("\nTest des seuils estomac à 30ml")
