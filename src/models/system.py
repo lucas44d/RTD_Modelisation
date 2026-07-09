@@ -12,25 +12,37 @@ from .reactor import (
     IleonReactor,
     StomieReactor,
 )
-from .pump import SyringePump, ReciprocatingPump
+from .pump import (
+    SyringePump, 
+    ReciprocatingPump,
+    build_digestive_solution_pumps,
+    build_transfer_pumps,
+    )
 from .operating_conditions import OperatingConditions
 
 class DigestionSystem:
     """Représente le système de digestion in vitro dynamique (IViDiS)"""
 
-    def __init__(self, use_stomie: bool = False, initial_stomach_volume_ml: float = 0.0, initial_preduodenum_volume_ml: float = 0.0):
+    def __init__(self, use_stomie: bool = False, initial_stomach_volume_ml: float = 0.0, initial_preduodenum_volume_ml: float = 0.0, operating_conditions: OperatingConditions = None,):
         self.r1_stomach = StomachReactor(initial_volume_ml=initial_stomach_volume_ml)
         self.r2_preduodenum = PreduodenumReactor(initial_volume_ml=initial_preduodenum_volume_ml)
         self.r3_duodenum = DuodenumReactor()
         self.r4_jejunum = JejunumReactor()
-
         # On peut choisir entre R5 = Iléon ou R5 = Stomie selon la configuration du système.
         self.r5_ileon_or_stomie = StomieReactor() if use_stomie else IleonReactor() 
 
+        #Pompes liées à l'agitation
         self.syringe_pump = SyringePump()
         self.reciprocating_pump_t3 = ReciprocatingPump()
-        self.conditions = OperatingConditions()  # Conditions de fonctionnement du système IViDiS
+        
+        #Pompes de dosage et de transfert
+        self.digestive_pumps = build_digestive_solution_pumps()  
+        self.transfer_pumps = build_transfer_pumps()  
 
+        # Conditions de fonctionnement du système IViDiS
+        self.operating_conditions = operating_conditions or OperatingConditions() 
+
+        
     @property
     def reactors(self):
         return [
@@ -40,8 +52,6 @@ class DigestionSystem:
             self.r4_jejunum,
             self.r5_ileon_or_stomie,
         ]
-
-
 
 
     """Fonctions pour retourner des infos sur le système complet à un instant donné"""
@@ -68,3 +78,13 @@ class DigestionSystem:
             "Barreau magnétique R2": self.r2_preduodenum.magnetic_stirrer_status(),
             "Pompe va-et-vient T3": self.reciprocating_pump_t3.status(t_s),
         }
+    
+    #Débit instantané (mL/min) de toutes les pompes de dosage et de transfert au temps t_s
+    def flow_rates_summary(self, t_s: float) -> dict:       
+        summary = {}
+        for name, pump in self.digestive_pumps.items():
+            summary[name] = pump.flow_rate_at(t_s)
+        for name, pump in self.transfer_pumps.items():
+            summary[name] = pump.flow_rate_at(t_s)
+        return summary
+ 
