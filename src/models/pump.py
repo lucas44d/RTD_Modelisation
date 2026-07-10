@@ -235,9 +235,7 @@ class FlowPump(Pump):
                 return False
         return True
 
- # ------------------------------------------------------------------
-# Pompes de dosage des solutions digestives (cf. tableau 2.4)
-# ------------------------------------------------------------------
+# Pompes de dosage des solutions digestives
 def build_digestive_solution_pumps() -> dict:
     """
     Instancie les pompes de dosage des solutions digestives, avec leurs
