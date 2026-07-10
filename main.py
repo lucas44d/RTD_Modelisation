@@ -15,6 +15,7 @@
 #    QMainWindow,
 # )
 
+from src.dataImport.profile_loader import ProfileLoader
 from src.models.system import DigestionSystem
 from src.models.pump import build_transfer_pumps, build_digestive_solution_pumps, hms_to_seconds
 
@@ -84,6 +85,12 @@ def main():
     for t in range(0, 7):   
         print(f"  t={t}s : {system.reciprocating_pump_t3.status(float(t))}")
 
+#Test importation tableau excel
+    print("\nTest importation tableau excel : ")
+    loader = ProfileLoader()
+    profiles = loader.load("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx")
+    for p in profiles:
+        print(p)
 
-if __name__ == "__main__":
+if __name__ == "__main__": 
     main()
