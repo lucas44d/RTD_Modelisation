@@ -15,7 +15,7 @@
 #    QMainWindow,
 # )
 
-from src.dataImport.excel_loader import ProfileLoader
+from src.dataImport.excel_loader import ExcelLoader
 from src.models.system import DigestionSystem
 from src.models.pump import build_transfer_pumps, build_digestive_solution_pumps, hms_to_seconds
 
@@ -87,8 +87,8 @@ def main():
 
 #Test importation tableau excel
     print("\nTest importation tableau excel : ")
-    loader = ProfileLoader()
-    simulation_parameters = loader.load_simulation_parameter("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx")
+    loader = ExcelLoader()
+    simulation_parameters = loader.load_simulation_parameter("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx", "Parametres simulation")
     for p in simulation_parameters:
         print(p)
 

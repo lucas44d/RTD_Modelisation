@@ -8,9 +8,9 @@ from src.models.meal_parameter import MealParameter
 """classe qui permet de charger les données d'un fichier excel dans les classes respectives"""
 class ExcelLoader:
     """Fonction qui permet de charger les données de simulation"""
-    def load_simulation_parameter(self, filename: str) -> list[SimulationParameter]:
+    def load_simulation_parameter(self, filename: str, sheet) -> list[SimulationParameter]:
         #Charge les données du fichier excel dans un dataFrame python
-        df = pd.read_excel(filename)
+        df = pd.read_excel(filename, sheet)
         #Instanciation d'une liste pour rentrer différents paramètres de simulation
         simulation_parameters = []
 
@@ -18,6 +18,7 @@ class ExcelLoader:
         for _, row in df.iterrows():
 
             simulation_parameter = SimulationParameter(
+                config_name = row["Nom de la config"],
                 enzyme_flow=row["Débit d'entrée enzyme"],
                 enzyme_entry_period=row["Période d'entrée enzyme"],
                 simulation_duration=row["Durée totale de simulation"],
@@ -31,9 +32,9 @@ class ExcelLoader:
         return simulation_parameters
  
     """Fonction pour charger les données d'un profil de digestion"""
-    def load_digestion_profile(self, filename: str) -> list[DigestionProfile]: 
+    def load_digestion_profile(self, filename: str, sheet) -> list[DigestionProfile]: 
         #Charge les données du fichier excel dans un dataFrame python
-        df = pd.read_excel(filename)
+        df = pd.read_excel(filename, sheet)
         #Instanciation d'une liste pour rentrer chaque profil de digestion du tableau
         digestion_profiles = []
 
@@ -57,9 +58,9 @@ class ExcelLoader:
         return digestion_profiles             
 
     """Fonction pour charger les données d'entrée d'un repas"""
-    def load_meal_parameters(self, filename: str) -> list[MealParameter]:
+    def load_meal_parameters(self, filename: str, sheet) -> list[MealParameter]:
         #Charge les données du fichier excel dans un dataFrame python
-        df = pd.read_excel(filename)
+        df = pd.read_excel(filename, sheet)
         #Instanciation d'une liste pour rentrer différents paramètres de repas
         meal_parameters = []
 

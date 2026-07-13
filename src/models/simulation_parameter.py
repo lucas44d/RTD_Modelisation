@@ -3,6 +3,7 @@ from dataclasses import dataclass
 """"Classe qui définit ce que sont les paramètres de simulation"""
 @dataclass
 class SimulationParameter:
+    config_name : str 
     enzyme_flow: float
     enzyme_entry_period: float
     simulation_duration: float
