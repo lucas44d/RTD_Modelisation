@@ -2,8 +2,9 @@ from fileinput import filename
 
 import pandas as pd
 
-class ExcelReader:
-    
+"""Classe qui permet la gestion de la lecture des fichiers excel"""
+class ExcelReader:    
+
+    """Ouverture d'un fichier excel avec Pandas"""
     def read_sheet(self, filename, sheet):
-        xls = pd.ExcelFile(filename)
         return pd.read_excel(filename, sheet)

@@ -15,7 +15,7 @@
 #    QMainWindow,
 # )
 
-from src.dataImport.profile_loader import ProfileLoader
+from src.dataImport.excel_loader import ProfileLoader
 from src.models.system import DigestionSystem
 from src.models.pump import build_transfer_pumps, build_digestive_solution_pumps, hms_to_seconds
 

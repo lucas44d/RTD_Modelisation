@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+""""Classe qui définit ce que sont les paramètres de simulation"""
 @dataclass
 class SimulationParameter:
     enzyme_flow: float
