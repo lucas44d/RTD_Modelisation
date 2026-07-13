@@ -23,7 +23,7 @@ from src.models.pump import build_transfer_pumps, build_digestive_solution_pumps
 def main():
     system = DigestionSystem()
 
-
+    """
 #Volumes tubulaires fixe (incrément 1.1)
     system = DigestionSystem(initial_stomach_volume_ml=400.0,initial_preduodenum_volume_ml=150.0)
     print("Volumes des différents réacteurs :")
@@ -79,17 +79,17 @@ def main():
     print("\nTest de débordement à 1000ml")
     overflow = system.r2_preduodenum.add_volume(1000.0)
     print(f"Volume actuel : {system.r2_preduodenum.volume:.2f} ml, débordement : {overflow:.2f} ml")
-
+"""
 #va et vient sur cycle complet
     print("\nCycle pompe va et vient T3 sur 6s : ")
-    for t in range(0, 7):   
+    for t in range(0, 12):   
         print(f"  t={t}s : {system.reciprocating_pump_t3.status(float(t))}")
 
 #Test importation tableau excel
     print("\nTest importation tableau excel : ")
     loader = ProfileLoader()
-    profiles = loader.load("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx")
-    for p in profiles:
+    simulation_parameters = loader.load_simulation_parameter("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx")
+    for p in simulation_parameters:
         print(p)
 
 if __name__ == "__main__": 
