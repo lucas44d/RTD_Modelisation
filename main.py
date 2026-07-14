@@ -1,20 +1,3 @@
-#import sys
-
-#import numpy as np
-#import pandas as pd
-
-#from scipy import interpolate
-#from scipy import optimize
-
-#import matplotlib.pyplot as plt
-
-#from openpyxl import load_workbook
-
-#from PySide6.QtWidgets import (
-#    QApplication,
-#    QMainWindow,
-# )
-
 from src.dataImport.excel_loader import ExcelLoader
 from src.models.system import DigestionSystem
 from src.models.pump import build_transfer_pumps, build_digestive_solution_pumps, hms_to_seconds
@@ -22,6 +5,30 @@ from src.models.pump import build_transfer_pumps, build_digestive_solution_pumps
 
 def main():
     system = DigestionSystem()
+
+    #Test importation tableau excel
+    print("\nTest importation tableau excel : ")
+    loader = ExcelLoader()
+
+    """Importation des paramètres de simulation"""
+    simulation_parameters = loader.load_simulation_parameter("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx", "Parametres simulation")
+    #print("\nParamètres de simulation : ")
+    #for p in simulation_parameters:
+    #    print(p)
+
+    digestion_profiles = loader.load_digestion_profile("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx", "Profil digestion")
+    #print("\n\nProfil de digestion")
+    #for p in digestion_profiles:
+    #    print(p)
+    
+    meal_parameter = loader.load_meal_parameters("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx", "Parametres repas","Particules")
+    print(meal_parameter)
+
+    choice = int(input("\nQuelle profil voulez vous choisir : "))
+
+    print("\nVoici le profil choisi : ", choice, "\n", digestion_profiles[choice])
+
+
 
     """
 #Volumes tubulaires fixe (incrément 1.1)
@@ -80,17 +87,11 @@ def main():
     overflow = system.r2_preduodenum.add_volume(1000.0)
     print(f"Volume actuel : {system.r2_preduodenum.volume:.2f} ml, débordement : {overflow:.2f} ml")
 """
+
 #va et vient sur cycle complet
     print("\nCycle pompe va et vient T3 sur 6s : ")
-    for t in range(0, 12):   
+    for t in range(0, 5):   
         print(f"  t={t}s : {system.reciprocating_pump_t3.status(float(t))}")
-
-#Test importation tableau excel
-    print("\nTest importation tableau excel : ")
-    loader = ExcelLoader()
-    simulation_parameters = loader.load_simulation_parameter("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx", "Parametres simulation")
-    for p in simulation_parameters:
-        print(p)
 
 if __name__ == "__main__": 
     main()
