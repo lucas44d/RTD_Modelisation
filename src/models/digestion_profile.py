@@ -8,7 +8,7 @@ class DigestionProfile:
     reciprocating_period : float
     mixing_speed_R1 : float
     mixing_speed_R2 : float
-    emulsion_mixing_speed : float
-    emulsion_mixing_period : float
-    reciprocating_stiring_speed : float
-    reciprocation_striring_period : float
+    emulsion_mixing_speed : float 
+    emulsion_mixing_period : float 
+    reciprocating_stiring_speed : float # Vitesse d'agitation de l'agitateur à pâle
+    reciprocation_striring_period : float # Période d'agitation de l'agitateur à pâle

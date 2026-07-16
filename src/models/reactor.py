@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from enum import Enum
 import math
 
-
+from src.simulation.experiment_configuration import ExperimentConfiguration
 
 # Constantes de conversion d'unités 
 FEET_TO_M = 0.3048
@@ -195,19 +195,21 @@ class PreduodenumReactor(StirredReactor):
     MIN_STIRRER_VOLUME_ML = 50.0
     CONSTANT_RPM = 200.0
 
-    def __init__(self, initial_volume_ml: float = 0.0):
+    def __init__(self, config: ExperimentConfiguration, initial_volume_ml: float = 0.0):
+        self.config = config
         super().__init__(
             name="R2 - Préduodénum",
             initial_volume_ml=initial_volume_ml,
             max_volume_ml=self.MAX_VOLUME_ML,
             min_agitation_volume_ml=self.MIN_STIRRER_VOLUME_ML,
         )
+        self.stiring_R2 = config.digestion_profile.mixing_speed_R2
 
     """Relation d'agitation du barreau magnétique de R2"""
     def magnetic_stirrer_status(self) -> StirrerStatus:
         if not self.is_agitation_active:
             return StirrerStatus(0.0, AgitationState.STOPPED)
-        return StirrerStatus(self.CONSTANT_RPM, AgitationState.RUNNING)
+        return StirrerStatus(self.stiring_R2, AgitationState.RUNNING)
 
 
 # Réacteurs tubulaires R3, R4, R5

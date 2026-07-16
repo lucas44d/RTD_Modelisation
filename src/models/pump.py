@@ -1,6 +1,6 @@
 """
 Pompes liées aux relations d'agitation :
-    - Pompe seringue de R1 (émulsion de l'estomac)
+    - Émulsion de R1 (EmuR1 : émulsion de l'estomac)
     - Pompe va-et-vient de R3 / T3
 
 Débits des pompes de dosage et de transfert : 
@@ -15,6 +15,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional
+
+from src.simulation.experiment_configuration import ExperimentConfiguration
 
 """Enumération des états possibles d'une pompe"""
 class PumpState(Enum):
@@ -45,7 +47,7 @@ class Pump:
 
 class SyringePump(Pump):
     """
-    Pompe seringue de R1
+    Émulsion de R1
 
     Fonctionnement : à un débit constant de 10 mL / 6 s, la pompe :
         1. Tire (aspire) 10 % du volume réel de l'estomac
@@ -59,8 +61,10 @@ class SyringePump(Pump):
     PAUSE_DURATION_S = 3.0
     MIN_ACTIVE_VOLUME_ML = 100.0
 
-    def __init__(self):
+    def __init__(self, config: ExperimentConfiguration):
+        self.config = config
         super().__init__("Pompe seringue R1")
+        self.flow_rate_ml_per_s = config.digestion_profile.emulsion_mixing_speed # Remplacer le speed par débit + période
 
     def draw_volume(self, stomach_volume_ml: float) -> float:
         """Volume aspiré pour le cycle courant (10 % du volume réel)"""
@@ -72,7 +76,7 @@ class SyringePump(Pump):
         Les temps d'aspiration et de poussée dépendent du volume tiré, à débit constant.
         """
         draw_ml = self.draw_volume(stomach_volume_ml)
-        move_time_s = draw_ml / self.FLOW_RATE_ML_PER_S
+        move_time_s = draw_ml / self.flow_rate_ml_per_s
         return 2 * move_time_s + self.PAUSE_DURATION_S
 
     def status(self, stomach_volume_ml: float, t_in_cycle_s: float) -> PumpStatus:
@@ -109,7 +113,8 @@ class ReciprocatingPump(Pump):
     WAIT_DURATION_S = 2.0
     CYCLE_DURATION_S = 2 * ACTION_DURATION_S + 2 * WAIT_DURATION_S  # 6 s
 
-    def __init__(self):
+    def __init__(self, config : ExperimentConfiguration):
+        self.config = config
         super().__init__("Pompe va-et-vient R3 (T3)")
 
     def status(self, t_s: float) -> PumpStatus:
@@ -132,7 +137,7 @@ class ReciprocatingPump(Pump):
 
         return PumpStatus(PumpState.PAUSED)
     
-"""Heures, minutes et secondes en secondes pour un meilleur traitement du temps par le programme"""
+"""Heures, minutes et secondes en secondes"""
 def hms_to_seconds(hms: str) -> float:
     """Convertit une durée sous format 'hh:mm:ss' en secondes"""
     h, m, s = hms.split(":") # Permet de diviser le temps

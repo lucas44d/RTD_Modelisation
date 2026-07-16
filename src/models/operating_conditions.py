@@ -15,6 +15,12 @@ class OperatingConditions:
 
     #variable de simulation 
     pH : float = 7.0
+    #Faut-il prendre en compte les valeurs du pH dans les différentes parties du système digestif :
+    #1.5-3.5 pour l'estomac
+    #6-6.5 pour le préduodénum
+    #6-7.4 pour le Duodénum
+    #7-8 pour le Jéjunum
+    #7-8 pour l'Iléon
     #TODO : Tenir compte du profil de pH dans le temps.
 
 
