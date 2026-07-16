@@ -4,6 +4,7 @@ from dataclasses import dataclass
 @dataclass
 class SimulationParameter:
     config_name : str 
+    enzyme_volume : float
     enzyme_flow: float
     enzyme_entry_period: float
     simulation_duration: float

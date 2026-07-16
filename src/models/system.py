@@ -19,21 +19,24 @@ from .pump import (
     build_transfer_pumps,
     )
 from .operating_conditions import OperatingConditions
+from src.dataImport.excel_loader import ExcelLoader
+from src.simulation.experiment_configuration import ExperimentConfiguration
 
 class DigestionSystem:
     """Représente le système de digestion in vitro dynamique (IViDiS)"""
 
-    def __init__(self, use_stomie: bool = False, initial_stomach_volume_ml: float = 0.0, initial_preduodenum_volume_ml: float = 0.0, operating_conditions: OperatingConditions = None,):
+    def __init__(self,config: ExperimentConfiguration, use_stomie: bool = False, initial_stomach_volume_ml: float = 0.0, initial_preduodenum_volume_ml: float = 0.0, operating_conditions: OperatingConditions = None,):
+        self.config = config
         self.r1_stomach = StomachReactor(initial_volume_ml=initial_stomach_volume_ml)
-        self.r2_preduodenum = PreduodenumReactor(initial_volume_ml=initial_preduodenum_volume_ml)
+        self.r2_preduodenum = PreduodenumReactor(config, initial_volume_ml=initial_preduodenum_volume_ml)
         self.r3_duodenum = DuodenumReactor()
         self.r4_jejunum = JejunumReactor()
         # On peut choisir entre R5 = Iléon ou R5 = Stomie selon la configuration du système.
         self.r5_ileon_or_stomie = StomieReactor() if use_stomie else IleonReactor() 
 
         #Pompes liées à l'agitation
-        self.syringe_pump = SyringePump()
-        self.reciprocating_pump_t3 = ReciprocatingPump()
+        self.syringe_pump = SyringePump(config)
+        self.reciprocating_pump_t3 = ReciprocatingPump(config)
         
         #Pompes de dosage et de transfert
         self.digestive_pumps = build_digestive_solution_pumps()  
@@ -41,7 +44,6 @@ class DigestionSystem:
 
         # Conditions de fonctionnement du système IViDiS
         self.operating_conditions = operating_conditions or OperatingConditions() 
-
         
     @property
     def reactors(self):
@@ -55,7 +57,6 @@ class DigestionSystem:
 
 
     """Fonctions pour retourner des infos sur le système complet à un instant donné"""
-
     def total_volume(self) -> float:
         """Volume total instantané du système (mL), somme de tous les réacteurs"""
         return sum(r.volume for r in self.reactors)
@@ -74,7 +75,7 @@ class DigestionSystem:
         return {
             "Barreau magnétique R1": self.r1_stomach.magnetic_stirrer_status(),
             "Agitateur à pale R1": self.r1_stomach.paddle_stirrer_status(),
-            "Pompe seringue R1": self.syringe_pump.status(self.r1_stomach.volume, t_in_syringe_cycle_s),
+            "Émulsion de R1": self.syringe_pump.status(self.r1_stomach.volume, t_in_syringe_cycle_s),
             "Barreau magnétique R2": self.r2_preduodenum.magnetic_stirrer_status(),
             "Pompe va-et-vient T3": self.reciprocating_pump_t3.status(t_s),
         }

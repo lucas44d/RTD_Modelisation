@@ -1,34 +1,18 @@
+from pathlib import Path
+
 from src.dataImport.excel_loader import ExcelLoader
 from src.models.system import DigestionSystem
 from src.models.pump import build_transfer_pumps, build_digestive_solution_pumps, hms_to_seconds
 
 
 def main():
-    system = DigestionSystem()
-
-    #Test importation tableau excel
-    print("\nTest importation tableau excel : ")
-    loader = ExcelLoader()
-
     """Importation des paramètres de simulation"""
-    simulation_parameters = loader.load_simulation_parameter("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx", "Parametres simulation")
-    #print("\nParamètres de simulation : ")
-    #for p in simulation_parameters:
-    #    print(p)
+    loader = ExcelLoader()
+    config = loader.load_configuration("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx")
 
-    digestion_profiles = loader.load_digestion_profile("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx", "Profil digestion")
-    #print("\n\nProfil de digestion")
-    #for p in digestion_profiles:
-    #    print(p)
+    system = DigestionSystem(config)
     
-    meal_parameter = loader.load_meal_parameters("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx", "Parametres repas","Particules")
-    print(meal_parameter)
-
-    choice = int(input("\nQuelle profil voulez vous choisir : "))
-
-    print("\nVoici le profil choisi : ", choice, "\n", digestion_profiles[choice])
-
-
+    print(config)
 
     """
 #Volumes tubulaires fixe (incrément 1.1)
@@ -90,7 +74,7 @@ def main():
 
 #va et vient sur cycle complet
     print("\nCycle pompe va et vient T3 sur 6s : ")
-    for t in range(0, 5):   
+    for t in range(0, 7):   
         print(f"  t={t}s : {system.reciprocating_pump_t3.status(float(t))}")
 
 if __name__ == "__main__": 
