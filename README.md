@@ -1,23 +1,28 @@
 # RTD Modelisation
 
-Python application for data processing, modelling and visualization.
+Application Python pour la simuler et modéliser des données sur la digestion dans un système digestif InVitro (IViDiS)  
 
-## Requirements
+## Prérequis
 
-Before starting, make sure the following software is installed:
+Avant de commencer, merci de vérifier que vous avez installé ces logiciels : 
 
-* Python 3.14 or newer
+* Python 3.14 ou plus récent
 * Git
-* Visual Studio Code (recommended)
+* Un IDE pour python (VScode/Spyder/etc.)
 
-## Clone the repository
+## Clonez le répertoire
+
+1. Rendez-vous dans un répertoire qui sera dédié à votre projet sur votre PC.
+2. Clique droit sur votre dossier et cliquez sur 'ouvrir dans le terminal'
+3. Copier l'url du répertoire GitHub (sur GitHub appuyez sur Code puis copiez l'adresse https)
+4. Clonez le répertoire sur votre espace personnel : 
 
 ```bash
 git clone <repository-url>
 cd RTD_Modelisation
 ```
 
-## Create a virtual environment
+## Créez un environnement virtuel 
 
 Windows:
 
@@ -25,7 +30,7 @@ Windows:
 py -m venv .venv
 ```
 
-## Activate the virtual environment
+## Activez l'environnement virtuel
 
 **PowerShell**
 
@@ -39,73 +44,75 @@ py -m venv .venv
 .venv\Scripts\activate.bat
 ```
 
-Once activated, the terminal should display:
+Une fois activité le terminal devrait afficher :
 
 ```text
 (.venv)
 ```
 
-## Install the required dependencies
+## Installer les dépendances requises
 
 ```bash
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-## Run the application
+## lancer l'application
 
+* Depuis votre IDE :
+    - Run Python application
+ 
+* En commande bash :
 ```bash
 python src/main.py
 ```
 
-## Project structure
+## Structure du projet 
 
 TODO
 
-## Updating dependencies
+## Mettre à jour les dépendances
 
-If a new library is added to the project, update the dependency list with:
+Si une nouvelle librairie est installée pour le projet, mettre à jour la liste des prérequis :
 
 ```bash
 pip freeze > requirements.txt
 ```
+commit le fichier `requirements.txt` pour que les autres utilisateurs aient le même environnement.
 
-Commit the updated `requirements.txt` so that other users can install the same environment.
+## Workflow git recommandé 
 
-## Recommended Git workflow
+1. Pull les derniers changement de la branche `main`.
+2. Créez une nouvelle branche de développement pour les prochaines implémentation ou la résolution des bug
 
-1. Pull the latest changes from the `main` branch.
-2. Create a new development branch for your feature or bug fix.
-
-
-If a dev branch isn't created yet :
+Si une branche dev n'est pas déjà créée :
 ```bash
 git checkout main
 git pull origin main
 git checkout -b dev
 ```
 
-If a dev branch is already created :
+Si la branche dev a déjà été créée plus tôt :
 ```bash
 git checkout main
 git pull origin main
 git checkout dev
 ```
 
-3. Develop and test your changes.
-4. Commit your work regularly with meaningful commit messages.
+3. Développer et tester les fonctionnalités
+4. Commit les changements régulièrement avec un message de commit cohérent
 
 ```bash
 git add .
 git commit -m "Implement feature X"
 ```
 
-5. Push your branch to GitHub.
+5. Push votre branche sur Github
 
 ```bash
 git push -u origin dev
 ```
-
-7. Open a Pull Request (Merge Request) from your development branch into `main` in github.
-8. Review the changes, resolve any comments if necessary, and merge the Pull Request.
-9. Go back to step one
+7. Ouvrir une Pull Request depuis votre branche de développement vers la branche `main` dans Github 
+8. Vérifiez les changements et assurez-vous qu'il n'y a pas de conflits. Si nécessaire, ajoutez des commentaires.
+9. Merger la Pull request 
+10. Retournez à l'étape 1
