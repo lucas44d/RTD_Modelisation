@@ -8,13 +8,6 @@ système IViDiS, nécessaire à l'advection des particules :
     - Dans les réacteurs agités R1/R2 (CSTR, bien mélangé) : il n'y a pas de direction d'écoulement unique. On utilise plutôt le taux de
       renouvellement du fluide (Q/V), qui correspond à l'inverse du temps de séjour moyen τ = V/Q (cf. 5.6), et sert à modéliser la probabilité de
       sortie d'une particule à chaque pas de temps (cf. particle_motion.py).
-
-NOTE IMPORTANTE : ce module fournit les FONCTIONS DE CALCUL génériques
-(u = Q/A, Q/V), indépendantes de la question « quel pompe alimente quel
-réacteur ? ». Le branchement exact des débits (A3/A4/B1/.../T1/T2, cf. 2.4 et
-2.5) sur chaque transition entre bioréacteurs dépend du PID.
-Une fois la topologie confirmée (quel pump alimente R3, R4, R5, etc.), il
-suffira d'appeler ces fonctions avec le bon `flow_rate_ml_min` au bon moment.
 """
 
 from __future__ import annotations
