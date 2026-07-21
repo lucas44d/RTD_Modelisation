@@ -9,7 +9,7 @@ class OperatingConditions:
     pressure : float = 101300 #en Pa // Faut-il plus de précision ?
 
     # Propriétés des fluides digestifs (approximation : eau = fluides digestifs)
-    fluid_density : float = 98.0  #On met ici 0.98 pour que les particules de densité 0.98 aient la même densité que le fluide
+    fluid_density : float = 980.0  #On met ici 0.98 pour que les particules de densité 0.98 aient la même densité que le fluide
     fluid_viscosity : float = 0.00069 #Pa.s
 
 

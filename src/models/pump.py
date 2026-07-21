@@ -179,14 +179,16 @@ class FlowPump(Pump):
     En dehors des segments définis, le débit est nul (pompe à l'arrêt).
     """
  
-    def __init__(self, name: str, segments: Optional[List[FlowSegment]] = None):
+    def __init__(self, name: str, segments: Optional[List[FlowSegment]] = None, hold_last_segment: bool = False):
         super().__init__(name)
         self.segments: List[FlowSegment] = sorted(
             segments or [], key=lambda seg: seg.start_time_s
         )
+        self.hold_last_segment = hold_last_segment
+
  
     @classmethod
-    def from_hms_table(cls, name: str, rows: List[tuple]) -> "FlowPump":
+    def from_hms_table(cls, name: str, rows: List[tuple], hold_last_segment: bool = False) -> "FlowPump":
         """
         Construit une pompe à partir d'une liste de tuples
         (temps_debut 'HH:MM:SS', temps_fin 'HH:MM:SS', debit_mL_min, volume_final_mL),
@@ -201,7 +203,7 @@ class FlowPump(Pump):
             )
             for start, end, flow, vol in rows
         ]
-        return cls(name, segments)
+        return cls(name, segments, hold_last_segment=hold_last_segment)
  
     
     # Débit instantané (mL/min) au temps t_s; 0 si aucun segment actif
@@ -209,6 +211,12 @@ class FlowPump(Pump):
         for seg in self.segments:
             if seg.contains(t_s):
                 return seg.flow_rate_ml_min
+ 
+        if self.hold_last_segment and self.segments:
+            last_seg = self.segments[-1]
+            if t_s >= last_seg.end_time_s:
+                return last_seg.flow_rate_ml_min
+ 
         return 0.0
  
     # Retourne vrai/faux selon si la pompe est active (débit > 0) au temps t_s
@@ -294,7 +302,7 @@ def build_transfer_pumps() -> dict:
         ],
     }
     return {
-        name: FlowPump.from_hms_table(f"Pompe de transfert {name}", rows)
+        name: FlowPump.from_hms_table(f"Pompe de transfert {name}", rows, hold_last_segment=True)
         for name, rows in tables.items()
     }
  

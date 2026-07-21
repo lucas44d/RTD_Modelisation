@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+
 """Classe définissant les particules"""
 @dataclass
 class ParticleType : 
