@@ -77,7 +77,7 @@ class ExcelLoader:
                 ParticleType(
                     particle_density=row["Densité"],
                     particle_size=row["Taille (pouce)"],
-                    count=row["Nombre"]   
+                    count=row["Nombre"],
                 )
             )
         #Retour de la liste des particules

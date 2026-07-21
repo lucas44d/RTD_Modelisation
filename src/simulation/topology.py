@@ -5,16 +5,10 @@ Topologie confirmée par le PID :
 
     R1 (Estomac)     --[T1, transfert]--> R2 (Préduodénum)
     R2 (Préduodénum) --[T2, transfert]--> R3 (Duodénum)
-                                        --(même débit)--> R4 (Jéjunum)
-                                        --(même débit)--> R5 (Iléon / Stomie)
+                     --(même débit)--> R4 (Jéjunum)
+                     --(même débit)--> R5 (Iléon / Stomie)
 
-    T3 (pompe va-et-vient) agite localement la jonction R2/R3
-    mais ne pilote PAS le débit net : elle est décrite en rpm (cycle aspiration/poussée)
-
-    Les pompes C1/C2/C3 et E1 injectent également de la matière dans le train tubulaire
-    R3/R4/R5, mais leur point d'injection exact reste une hypothèse de lecture du schéma manuscrit (pas de certitude absolue) :
-    C1/C2/C3 sont supposées injecter au niveau de R3 (Duodénum, pH #3), E1 au niveau de R4/R5 (vers l'Iléon). Ces contributions ne sont PAS
-    incluses par défaut dans le calcul de vitesse ci-dessous ; utilisez `additional_inflows` pour les ajouter explicitement une fois confirmées.
+    T3 (pompe va-et-vient) agite localement la jonction R2/R3 mais ne pilote PAS le débit net (cycle aspiration/poussée)
 """
 
 from __future__ import annotations
@@ -34,8 +28,7 @@ DEFAULT_ADDITIONAL_INFLOWS = {
 
 def reactor_inflow_rate(system: DigestionSystem, reactor_name: str, t_s: float, extra_inflows: Optional[List[str]] = None, use_default_additional_inflows: bool = True) -> float:
     """
-    Débit volumique net (mL/min) entrant dans un réacteur donné au temps
-    t_s, selon la topologie confirmée par le PID.
+    Débit volumique net (mL/min) entrant dans un réacteur donné au temps t_s, selon la topologie confirmée par le PID.
 
     extra_inflows : noms de pompes de dosage supplémentaires à ajouter, en plus des injections par défaut
     
