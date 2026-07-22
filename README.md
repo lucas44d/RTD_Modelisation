@@ -22,7 +22,22 @@ git clone <repository-url>
 cd RTD_Modelisation
 ```
 
-## Créez un environnement virtuel 
+## Ouvrir le projet 
+
+### VS Code :
+
+1. Cliquez sur file en haut à gauche de votre interface vscode
+2. Choississez "Open Folder"
+3. Récupérez le dossier du projet et appuyez sur "Select Folder"
+
+
+### Spyder : 
+
+1. Cliquez sur l'onglet "Projets" sur le menu de votre interface Spyder
+2. Choississez "Ouvrir un projet"
+3. Récupérez le dossier du projet et appuyez sur "Sélectionnez un dossier"
+
+## Créez un environnement virtuel (VS code) 
 
 Windows:
 
@@ -30,7 +45,7 @@ Windows:
 py -m venv .venv
 ```
 
-## Activez l'environnement virtuel
+## Activez l'environnement virtuel (VS code)
 
 **PowerShell**
 
