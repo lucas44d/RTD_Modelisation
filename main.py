@@ -15,45 +15,48 @@ from src.simulation.simulation import (
     run_simulation,
     print_particle_physics_diagnostics
 )
-from src.simulation.rtd import probability_density_calculation, cumulative_function_calcultation
+from src.simulation.rtd import (
+    compute_F_t,
+    compute_E_t,
+    residence_time_summary)
 
 from PySide6.QtWidgets import QApplication
 from src.visualization.gui import MainWindow
 
 
 def main():
-    """Importation des paramètres de simulation"""
+    """ Importation des paramètres de simulation """
     loader = ExcelLoader()
     config = loader.load_configuration("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx")
-    
     system = DigestionSystem(config, initial_stomach_volume_ml=400.0, initial_preduodenum_volume_ml=150.0)
- 
     meal =  config.meal_parameter
     simulation = config.simulation_parameter
-    particle_type = loader._load_particles("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx","Particules")
 
+    """ Importation du repas et des particules qui constituent le repas """
+    particle_type = loader._load_particles("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx","Particules")
     particles = generate_particles_from_meal(meal, entry_time_s=0.0, starting_reactor="R1 - Estomac")
 
+    """ Permet de vérifier quelle formule utiliser selon le type de particule (sédimentation corrigée ou formule de Stokes pur)"""
     use_corrected_by_type = print_particle_physics_diagnostics(particle_type, system.operating_conditions)
-
 
     print(f"Population simulée : {len(particles)} particules")
     print(f"Durée de simulation : {simulation.simulation_duration} s, pas de temps : {simulation.time_step} s\n")
- 
+
+    """ Lancement de la simulation """
     run_simulation(system=system, particles=particles, use_corrected_by_type=use_corrected_by_type, dt_s=simulation.time_step, max_t_s=simulation.simulation_duration,)
 
-    # --- Résultats ---
+    """ Résultats """ 
     for i, particle in enumerate(particles):
         statut = (f"tau = {particle.residence_time_s:.1f} s"
                   if particle.residence_time_s is not None
                   else "N'a PAS terminé sa traversée (augmenter simulation_duration)")
         print(f"  Particule {i + 1:2d} (rho={particle.particle_type.particle_density:.0f} kg/m3) : {statut}")
  
-    temps_residence = [p.residence_time_s for p in particles if p.residence_time_s is not None]
-    if temps_residence:
-        moyenne = sum(temps_residence) / len(temps_residence)
-        print(f"\nTemps de résidence moyen : {moyenne:.1f} s ({moyenne / 60:.1f} min)")
-        print(f"Particules ayant terminé : {len(temps_residence)} / {len(particles)}")
+    residence_time = [p.residence_time_s for p in particles if p.residence_time_s is not None]
+    if residence_time:
+        residence_time_average = sum(residence_time) / len(residence_time)
+        print(f"\nTemps de résidence moyen : {residence_time_average:.1f} s")
+        print(f"Particules ayant terminé : {len(residence_time)} / {len(particles)}")
     else:
         print("\nAucune particule n'a terminé sa traversée dans la fenêtre testée.")
  
@@ -67,18 +70,25 @@ def main():
 
     print(compteur)
 
-    E_t, bin_edges = probability_density_calculation(temps_residence)
-    F_t = cumulative_function_calcultation(E_t,bin_edges)
+    rtd_summary = residence_time_summary(particles)
+    print("\nRésumée des temps de résidence :")
+    print(f"Particules totales   : {rtd_summary['n_total']}")
+    print(f"Particules sorties   : {rtd_summary['n_completed']}")
+    print(f"Particules actives   : {rtd_summary['n_active']}")
+    print(f"Taux de complétion   : {rtd_summary['completion_rate']:.2%}")
+    print(f"Temps moyen (tau_bar): {rtd_summary['mean_residence_time_s']:.2f} s")
+    print(f"Variance (sigma^2)   : {rtd_summary['variance_s2']:.2f} s²")
+    print(f"Écart-type (sigma)   : {rtd_summary['std_dev_s']:.2f} s")
+    
 
-    t_centres = (bin_edges[:-1] + bin_edges[1:]) / 2    
-
+    bin_centers, E_t = compute_E_t(rtd_summary["taus"])
+    t_centres, F_t = compute_F_t(rtd_summary["taus"])
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
 
     # Graphique 1 : E(t) - Densité de probabilité
-    ax1.plot(t_centres, E_t, 'b-', lw=2, label='$E(t)$ (densité)')
-    ax1.fill_between(t_centres, E_t, color='blue', alpha=0.2)  # Remplissage sous la courbe
-    ax1.set_xlim(left=0)
+    ax1.plot(bin_centers, E_t, 'b-', lw=2, label='$E(t)$ (densité)')
+    ax1.fill_between(bin_centers, E_t, color='blue', alpha=0.2)  # Remplissage sous la courbe
     ax1.set_title("Densité de temps de séjour E(t)")
     ax1.set_xlabel("Temps t (min)")
     ax1.set_ylabel("E(t) ($min^{-1}$)")

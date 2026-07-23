@@ -27,8 +27,7 @@ def print_particle_physics_diagnostics(particle_types, operating_conditions) -> 
     """
     Affiche, pour chaque type de particule du repas, les forces en jeu (poids, poussée d'Archimède, force nette) et la validité du régime de Stokes
  
-    Retourne un dict {id(particle_type): bool} indiquant, pour chaque type de particule, 
-    s'il faut utiliser la vitesse de sédimentation corrigée plutôt que Stokes pur
+    Retourne un dict {id(particle_type): bool} indiquant, pour chaque type de particule, s'il faut utiliser la vitesse de sédimentation corrigée plutôt que Stokes pur
     """
     use_corrected = {}
     print("____Diagnostic physique des particules____ ")
