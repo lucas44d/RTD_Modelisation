@@ -1,56 +1,42 @@
-from src.simulation.topology import tubular_velocity_at, cstr_outflow_rate
-from src.simulation.particle_motion import (
+from __future__ import annotations
+from typing import List, Dict
+
+from src.models.system import DigestionSystem
+from src.models.particle_type import ParticleType
+from src.models.meal_parameter import MealParameter
+
+from .topology import tubular_velocity_at, cstr_outflow_rate
+from .particle_motion import (
+    Particle,
+    generate_particles_from_meal,
     update_position_tubular,
     has_exited_tubular_reactor,
     transition_to_reactor,
     mark_particle_exit,
     attempt_cstr_exit,
 )
-from src.simulation.buoyancy import (
-    gravity_force_n,
-    archimedes_buoyancy_force_n,
-    net_vertical_force_n,
-)
-from src.simulation.sedimentation import (
-    stokes_settling_velocity,
-    particle_reynolds_number,
-    is_stokes_regime_valid,
-)
-from PySide6.QtWidgets import QApplication
-from src.visualization.gui import MainWindow
-
+from .sedimentation import stokes_settling_velocity, is_stokes_regime_valid
 
 # Ordre des réacteurs tubulaires (R3 -> R4 -> R5), utilisé pour les transitions
 TUBULAR_CHAIN_NAMES = ["R3 - Duodénum", "R4 - Jéjunum", "R5 - Iléon"]
 
-def print_particle_physics_diagnostics(particle_types, operating_conditions) -> dict:
-    """
-    Affiche, pour chaque type de particule du repas, les forces en jeu (poids, poussée d'Archimède, force nette) et la validité du régime de Stokes
+"""
+    Détermine, pour chaque type de particule, s'il faut utiliser la vitesse de sédimentation corrigée 
+    plutôt que la loi de Stokes pure, selon la validité du régime 
  
-    Retourne un dict {id(particle_type): bool} indiquant, pour chaque type de particule, s'il faut utiliser la vitesse de sédimentation corrigée plutôt que Stokes pur
-    """
-    use_corrected = {}
-    print("____Diagnostic physique des particules____ ")
+    Retourne {id(particle_type): bool} (True = utiliser la version corrigée).
+"""
+def compute_settling_velocity_choices(particle_types: List[ParticleType], operating_conditions) -> Dict[int, bool]:
+    choices = {}
     for pt in particle_types:
-        f_g = gravity_force_n(pt)
-        f_a = archimedes_buoyancy_force_n(pt, operating_conditions)
-        f_net = net_vertical_force_n(pt, operating_conditions)
         vs = stokes_settling_velocity(pt, operating_conditions)
-        re = particle_reynolds_number(vs, pt, operating_conditions)
         valide = is_stokes_regime_valid(vs, pt, operating_conditions)
-        use_corrected[id(pt)] = not valide
+        choices[id(pt)] = not valide
+    return choices
  
-        comportement = "sédimente" if f_net > 0 else ("flotte" if f_net < 0 else "neutre")
-        formule = "Stokes " if valide else "corrigée"
-        print(f"  rho={pt.particle_density:.0f} kg/m3, r={pt.particle_size * 1000:.3f} mm : "
-              f"F_g={f_g:.2e} N, F_a={f_a:.2e} N, F_net={f_net:.2e} N ({comportement}) | "
-              f"Re_p={re:.1f} -> formule utilisée : {formule}")
-    print()
-    return use_corrected
- 
- 
-def step_particle(particle, system, t: float, dt_s: float, use_corrected_by_type: dict, reactors_by_name: dict) -> None:
-    """Fait avancer une particule d'un pas de temps dt_s, au temps t"""
+
+"""Fait avancer une particule d'un pas de temps dt_s, au temps t"""
+def step_particle(particle: Particle, system: DigestionSystem, t: float, dt_s: float, use_corrected_by_type: Dict[int, bool], reactors_by_name: dict) -> None:
     if not particle.active or t < particle.entry_time_s:
         return
  
@@ -81,14 +67,20 @@ def step_particle(particle, system, t: float, dt_s: float, use_corrected_by_type
                 mark_particle_exit(particle, t)
  
  
-def run_simulation(system, particles: list, use_corrected_by_type: dict, dt_s: float, max_t_s: float) -> list:
+def run_population_simulation(system: DigestionSystem, meal: MealParameter, dt_s: float, max_t_s: float, entry_time_s: float = 0.0, starting_reactor: str = "R1 - Estomac") -> List[Particle]:
     """
-    Boucle principale de simulation : à CHAQUE pas de temps, toutes les particules actives sont mises à jour 
-    S'arrête dès que toutes les particules sont sorties, ou que max_t_s est atteint.
-    """
-    reactors_by_name = {r.name: r for r in system.reactors}
-    t = 0.0
+    Simule toute la population de particules d'un repas à travers le système, depuis entry_time_s jusqu'à leur sortie ou max_t_s
  
+    Structure : à chaque pas de temps, toutes les particules actives sont mises à jour nécessaire pour 
+    calculer des statistiques d'ensemble à un instant t donné
+ 
+    Retourne la liste des Particle (residence_time_s rempli pour celles qui ont terminé leur traversée, None pour celles encore dans le système).
+    """
+    use_corrected_by_type = compute_settling_velocity_choices(meal.particles, system.operating_conditions)
+    particles = generate_particles_from_meal(meal, entry_time_s=entry_time_s, starting_reactor=starting_reactor)
+    reactors_by_name = {r.name: r for r in system.reactors}
+ 
+    t = entry_time_s
     while t < max_t_s and any(p.active for p in particles):
         t += dt_s
         for particle in particles:
