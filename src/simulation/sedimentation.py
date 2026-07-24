@@ -104,8 +104,8 @@ def corrected_settling_velocity(particle_type: ParticleType, operating_condition
     """
     r = (particle_type.particle_size * INCH_TO_M)/2
     delta_rho = effective_density_difference(particle_type, operating_conditions)
-    rho_f = operating_conditions.fluid_density_kg_m3
-    mu = operating_conditions.fluid_viscosity_pa_s
+    rho_f = operating_conditions.fluid_density
+    mu = operating_conditions.fluid_viscosity
 
     if mu <= 0:
         raise ValueError("La viscosité du fluide doit être strictement positive.")
