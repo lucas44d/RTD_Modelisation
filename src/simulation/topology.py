@@ -25,7 +25,6 @@ DEFAULT_ADDITIONAL_INFLOWS = {
     "R5 - Stomie": ["E1"],
 }
 
-
 def reactor_inflow_rate(system: DigestionSystem, reactor_name: str, t_s: float, extra_inflows: Optional[List[str]] = None, use_default_additional_inflows: bool = True) -> float:
     """
     Débit volumique net (mL/min) entrant dans un réacteur donné au temps t_s, selon la topologie confirmée par le PID.

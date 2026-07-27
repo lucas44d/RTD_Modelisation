@@ -58,8 +58,7 @@ def net_vertical_force_n(particle_type: ParticleType, operating_conditions: Oper
     return gravity_force_n(particle_type) - archimedes_buoyancy_force_n(particle_type, operating_conditions)
 
 
-def effective_density_difference(particle_type: ParticleType,
-                                  operating_conditions: OperatingConditions) -> float:
+def effective_density_difference(particle_type: ParticleType, operating_conditions: OperatingConditions) -> float:
     """
     Différence de densité effective (kg/m3) : rho_p - rho_f
     C'est cette différence qui apparaît directement dans la loi de Stokes; elle est mathématiquement équivalente à

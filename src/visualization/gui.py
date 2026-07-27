@@ -40,7 +40,7 @@ from .plots import plot_residence_time_distribution, plot_cumulative_distributio
 """Tableau éditable des types de particules du repas"""
 class ParticleTypeTable(QTableWidget):
  
-    COLUMNS = ["Densité (kg/m^3)", "Rayon (mm)", "Nombre"]
+    COLUMNS = ["Densité (kg/m^3)", "Rayon (m)", "Nombre"]
  
     def __init__(self, particle_types, parent=None):
         super().__init__(0, len(self.COLUMNS), parent)

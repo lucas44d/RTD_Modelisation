@@ -26,8 +26,6 @@ from src.models.particle_type import ParticleType
 from src.models.operating_conditions import OperatingConditions
 from .buoyancy import effective_density_difference, GRAVITY_M_S2
 
-INCH_TO_M = 0.0254
-
 """ Vitesse de sédimentation de Stokes """
 def stokes_settling_velocity(particle_type: ParticleType, operating_conditions: OperatingConditions) -> float:
     """
@@ -41,7 +39,7 @@ def stokes_settling_velocity(particle_type: ParticleType, operating_conditions: 
     NOTE : particle_type.particle_size est interprété comme le rayon r (m).
     v_s > 0 signifie que la particule sédimente (rho_p > rho_f), v_s < 0 qu'elle flotte.
     """
-    r = (particle_type.particle_size * INCH_TO_M)/2
+    r = (particle_type.particle_size)/2
     delta_rho = effective_density_difference(particle_type, operating_conditions)
     mu = operating_conditions.fluid_viscosity
 
@@ -58,7 +56,7 @@ def particle_reynolds_number(velocity_m_s: float, particle_type: ParticleType, o
 
     Utilisé pour vérifier la validité de la loi de Stokes et pour choisir la corrélation de coefficient de traînée appropriée
     """
-    diameter =(particle_type.particle_size * INCH_TO_M)
+    diameter =(particle_type.particle_size)
     rho_f = operating_conditions.fluid_density
     mu = operating_conditions.fluid_viscosity
     if mu <= 0:
@@ -102,7 +100,7 @@ def corrected_settling_velocity(particle_type: ParticleType, operating_condition
 
     Retourne une vitesse signée (positive = sédimente, négative = flotte), par cohérence avec stokes_settling_velocity().
     """
-    r = (particle_type.particle_size * INCH_TO_M)/2
+    r = (particle_type.particle_size)/2
     delta_rho = effective_density_difference(particle_type, operating_conditions)
     rho_f = operating_conditions.fluid_density
     mu = operating_conditions.fluid_viscosity

@@ -20,7 +20,7 @@ ML_PER_MIN_TO_M3_PER_S = 1e-6 / 60.0  # 1 mL/min = 1e-6 m^3, divisé par 60 s
 
 
 def cross_section_area_m2(inner_diameter_in: float) -> float:
-    """Section transversale interne d'un tube (m2), à partir de son diamètre (po)"""
+    """Section interne d'un tube (m2), à partir de son diamètre (po)"""
     diameter_m = inner_diameter_in * INCH_TO_M
     return math.pi * (diameter_m / 2) ** 2
 

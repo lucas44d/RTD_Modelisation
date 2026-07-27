@@ -42,12 +42,12 @@ def step_particle(particle: Particle, system: DigestionSystem, t: float, dt_s: f
  
     if particle.current_reactor == "R1 - Estomac":
         q_out = cstr_outflow_rate(system, "R1 - Estomac", t)
-        if attempt_cstr_exit(particle, q_out, system.r1_stomach.volume, dt_s):
+        if attempt_cstr_exit(q_out, system.r1_stomach.volume, dt_s):
             transition_to_reactor(particle, "R2 - Préduodénum")
  
     elif particle.current_reactor == "R2 - Préduodénum":
         q_out = cstr_outflow_rate(system, "R2 - Préduodénum", t)
-        if attempt_cstr_exit(particle, q_out, system.r2_preduodenum.volume, dt_s):
+        if attempt_cstr_exit(q_out, system.r2_preduodenum.volume, dt_s):
             transition_to_reactor(particle, "R3 - Duodénum")
  
     elif particle.current_reactor in TUBULAR_CHAIN_NAMES:
