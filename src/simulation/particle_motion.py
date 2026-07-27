@@ -2,7 +2,8 @@
 Implémente :
     - La vitesse de sédimentation de Stokes
     - Le déplacement des particules par advection (direction x, réacteurs tubulaires) et par sédimentation/flottation (direction z)
-    - Une modélisation simplifiée de l'agitation/turbulence dans les réacteurs agités R1/R2, et la sortie stochastique d'une particule d'un CSTR (basée sur le taux de renouvellement du fluide, cf. flow.py)
+    - Une modélisation simplifiée de l'agitation/turbulence dans les réacteurs agités R1/R2, et la sortie stochastique d'une particule
+      d'un CSTR (basée sur le taux de renouvellement du fluide)
 """
 
 from __future__ import annotations
@@ -19,7 +20,6 @@ from .sedimentation import stokes_settling_velocity, corrected_settling_velocity
 
 GRAVITY_M_S2 = 9.81
 FEET_TO_M = 0.3048
-INCH_TO_M = 0.0254
 
 """
 Représentation d'une particule individuelle
@@ -33,7 +33,8 @@ class Particle:
     exit_time_s : temps de sortie du système (rempli une fois sortie)
     active : False une fois la particule sortie du système
     
-    NOTE : Il peut être possible d'ajouter un id au particules pour les identifier plus facilement pour l'analyse des résultats
+    NOTE : Il peut être possible d'ajouter un id au particules pour les identifier plus facilement pour l'analyse des résultats, 
+    à voir si nécessaire (peut être pour le graphique des trajectoire des particules ?)
     """
     particle_type: ParticleType
     x: float = 0.0
@@ -93,7 +94,7 @@ def apply_agitation_mixing(particle: Particle, rpm: float, dt_s: float, mixing_c
 
 
 """ Fonction qui permet de déterminer si une particule peut sortir du réacteur ou non"""
-def attempt_cstr_exit(particle: Particle, flow_rate_ml_min: float, volume_ml: float, dt_s: float) -> bool:
+def attempt_cstr_exit(flow_rate_ml_min: float, volume_ml: float, dt_s: float) -> bool:
     """
     Tire au sort si la particule sort du réacteur agité durant ce pas de temps, en cohérence avec l'hypothèse CSTR :
     la probabilité de sortie durant dt est 1 - exp(-(Q/V)*dt) (processus sans mémoire -> distribution exponentielle des temps de séjour E(t) = (1/tau) e^(-t/tau)).

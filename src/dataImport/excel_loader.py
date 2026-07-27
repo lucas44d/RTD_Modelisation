@@ -4,8 +4,10 @@ from src.models.digestion_profile import DigestionProfile
 from src.models.simulation_parameter import SimulationParameter
 from src.models.meal_parameter import MealParameter
 from src.models.particle_type import ParticleType
-from src.simulation.experiment_configuration import ExperimentConfiguration
+from src.models.experiment_configuration import ExperimentConfiguration
 
+
+INCH_TO_METER = 0.0254
 
 """classe qui permet de charger les données d'un fichier excel dans les classes respectives"""
 class ExcelLoader:
@@ -76,7 +78,7 @@ class ExcelLoader:
             particles.append(
                 ParticleType(
                     particle_density=row["Densité"],
-                    particle_size=row["Taille (pouce)"],
+                    particle_size=row["Taille (pouce)"] * INCH_TO_METER, #Récupérée en pouce et converti directement en mètre
                     count=row["Nombre"],
                 )
             )

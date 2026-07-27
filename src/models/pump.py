@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional
 
-from src.simulation.experiment_configuration import ExperimentConfiguration
+from src.models.experiment_configuration import ExperimentConfiguration
 
 """Enumération des états possibles d'une pompe"""
 class PumpState(Enum):

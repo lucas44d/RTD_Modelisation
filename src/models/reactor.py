@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from enum import Enum
 import math
 
-from src.simulation.experiment_configuration import ExperimentConfiguration
+from src.models.experiment_configuration import ExperimentConfiguration
 
 # Constantes de conversion d'unités 
 FEET_TO_M = 0.3048

@@ -19,8 +19,7 @@ from .pump import (
     build_transfer_pumps,
     )
 from .operating_conditions import OperatingConditions
-from src.dataImport.excel_loader import ExcelLoader
-from src.simulation.experiment_configuration import ExperimentConfiguration
+from src.models.experiment_configuration import ExperimentConfiguration
 
 class DigestionSystem:
     """Représente le système de digestion in vitro dynamique (IViDiS)"""
