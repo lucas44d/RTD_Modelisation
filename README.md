@@ -37,18 +37,25 @@ cd RTD_Modelisation
 2. Choississez "Ouvrir un projet"
 3. Récupérez le dossier du projet et appuyez sur "Sélectionnez un dossier"
 
-## Créez un environnement virtuel (VS code) 
+## Créez un environnement virtuel
 
 
-dans le dossier qui accueil votre projet exécutez cette commande :
+dans le dossier qui accueilli votre projet exécutez cette commande  (clique droit + ouvrir un nouveau terminal) :
 
 ```bash
 python -m venv .venv
 ```
 
-## Activez l'environnement virtuel (VS code)
+Si vous êtes sur Spyder, vous pouvez activer l'environnement python directement sur votre logiciel :
+1. allez sur outils> preferences> Interpréteur python
+2. Cliquez sur Interpréteur sélectionné
+3. rendez vous dans le dossier .venv>Scripts> 
+4. sélectionné python.exe
 
-Au même endroit effectuez ces commandes : 
+
+## Activez l'environnement virtuel
+
+Rendez-vous dans le dossier qui a accueilli votre projet, ouvrez un terminal : 
 
 **PowerShell**
 
@@ -65,10 +72,12 @@ Au même endroit effectuez ces commandes :
 Une fois activité le terminal devrait afficher :
 
 ```text
-(.venv)
+(.venv) [Chemin d'accès à votre projet]
 ```
 
 ## Installer les dépendances requises
+
+Toujours dans le même endroit exécutez ces commandes :
 
 ```bash
 python -m pip install --upgrade pip
