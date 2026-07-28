@@ -10,7 +10,7 @@ Interface graphique PySide6 :
 from __future__ import annotations
 import sys
 import time
- 
+from pathlib import Path 
  
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
@@ -32,10 +32,8 @@ from src.simulation.rtd import (
     compute_E_t,
     compute_F_t,
 )
-from src.simulation.flow import mean_residence_time_cstr
  
 from .plots import plot_residence_time_distribution, plot_cumulative_distribution
-
 
 """Tableau éditable des types de particules du repas"""
 class ParticleTypeTable(QTableWidget):
@@ -292,8 +290,7 @@ class MainWindow(QMainWindow):
         self.summary_label.setText(text)
  
         # Distribution E(t)
-        bin_centers, e_values = compute_E_t(taus, n_bins=20)
- 
+        bin_centers, e_values = compute_E_t(taus, n_bins=100)
         fig_e = plot_residence_time_distribution(bin_centers, e_values)
         self._replace_canvas(self.tabs, 0, fig_e, "Distribution E(t)")
  
@@ -304,7 +301,7 @@ class MainWindow(QMainWindow):
  
     @staticmethod
     def _replace_canvas(tabs: QTabWidget, index: int, figure, title: str) -> None:
-        """Remplace le canvas matplotlib d'un onglet par une nouvelle figure."""
+        """Remplace le canvas matplotlib d'un onglet par un autre graphique"""
         new_canvas = FigureCanvas(figure)
         tabs.removeTab(index)
         tabs.insertTab(index, new_canvas, title)
@@ -317,12 +314,17 @@ class MainWindow(QMainWindow):
 """
 def simulation_initialization():
     # Importation du tableau excel
+    current_file = Path(__file__).resolve()
+    base_dir = next(p for p in current_file.parents if (p / "resources").is_dir())
+
+    excel_path = base_dir / "resources" / "Test_import.xlsx"
+
     loader = ExcelLoader()
-    config = loader.load_configuration("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx")
+    config = loader.load_configuration(excel_path)
         
     # Système et repas de test 
     system = DigestionSystem(config, initial_stomach_volume_ml=400.0, initial_preduodenum_volume_ml=150.0)
-    particle_types = loader._load_particles("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx","Particules")
+    particle_types = loader._load_particles(excel_path,"Particules")
     meal =  config.meal_parameter
           
     # Simulation

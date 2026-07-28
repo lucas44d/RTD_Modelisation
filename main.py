@@ -9,7 +9,7 @@ main.py se contente de construire la configuration, lancer la simulation, et aff
  
 import sys
 import os
- 
+from pathlib import Path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
  
 from src.models.system import DigestionSystem
@@ -24,13 +24,18 @@ from src.simulation.rtd import (
 ) 
  
 def main():
+
+    current_file = Path(__file__).resolve()
+    base_dir = next(p for p in current_file.parents if (p / "resources").is_dir())
+    
+    excel_path = base_dir / "resources" / "Test_import.xlsx"
     loader = ExcelLoader()
-    config = loader.load_configuration("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx")
+    config = loader.load_configuration(excel_path)
     
  
     # Système et repas de test 
     system = DigestionSystem(config, initial_stomach_volume_ml=400.0, initial_preduodenum_volume_ml=150.0)
-    particle_types = loader._load_particles("C:\\Users\\lucas\\Documents\\Canada\\UdS\\Projet\\RTD_Modelisation\\resources\\Test_import.xlsx","Particules")
+    particle_types = loader._load_particles(excel_path,"Particules")
     meal =  config.meal_parameter
     simulation = config.simulation_parameter
     
