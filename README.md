@@ -69,7 +69,7 @@ Une fois activité le terminal devrait afficher :
 
 ```bash
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 ## lancer l'application
@@ -91,7 +91,7 @@ TODO
 Si une nouvelle librairie est installée pour le projet, mettre à jour la liste des prérequis :
 
 ```bash
-pip freeze > requirements.txt
+python -m pip freeze > requirements.txt
 ```
 commit le fichier `requirements.txt` pour que les autres utilisateurs aient le même environnement.
 
