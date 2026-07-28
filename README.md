@@ -97,6 +97,8 @@ commit le fichier `requirements.txt` pour que les autres utilisateurs aient le m
 
 ## Workflow git recommandé 
 
+#### Chaque commande 'bash' doit être effectuée directement sur le terminal de commande (cf section "Clonez répertoire") 
+
 1. Pull les derniers changement de la branche `main`.
 2. Créez une nouvelle branche de développement pour les prochaines implémentation ou la résolution des bug
 
