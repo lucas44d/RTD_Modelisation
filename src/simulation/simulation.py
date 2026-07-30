@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import List, Dict
+from typing import List, Dict, Callable, Optional
+from dataclasses import dataclass, field
 
 from src.models.system import DigestionSystem
 from src.models.particle_type import ParticleType
@@ -16,9 +17,31 @@ from .particle_motion import (
     attempt_cstr_exit,
 )
 from .sedimentation import stokes_settling_velocity, is_stokes_regime_valid
+from simulation.volume_dynamics import (
+    update_reactor_volumes,
+    inject_meal_into_stomach,
+    update_tubular_reactor_volumes,
+)
 
 # Ordre des réacteurs tubulaires (R3 -> R4 -> R5), utilisé pour les transitions
 TUBULAR_CHAIN_NAMES = ["R3 - Duodénum", "R4 - Jéjunum", "R5 - Iléon"]
+
+
+@dataclass
+class SimulationResult:
+    """
+    Résultat d'une simulation complète : population de particules (avec
+    leurs temps de résidence, cf. increment 3.5) et historique des volumes
+    de chaque réacteur au fil du temps (cf. demande utilisateur : courbe
+    de suivi des volumes du système).
+ 
+    volume_history : {"t": [...], "R1 - Estomac": [...], ...}, une entrée
+    par pas de temps simulé, pour chacun des 5 réacteurs.
+    """
+    particles: List[Particle]
+    volume_history: Dict[str, List[float]] = field(default_factory=dict)
+
+
 
 """
     Détermine, pour chaque type de particule, s'il faut utiliser la vitesse de sédimentation corrigée 
@@ -55,7 +78,7 @@ def step_particle(particle: Particle, system: DigestionSystem, t: float, dt_s: f
         u = tubular_velocity_at(system, reactor, t)
         use_corrected = use_corrected_by_type.get(id(particle.particle_type), False)
         update_position_tubular(
-            particle, u_m_s=u, operating_conditions=system.operating_conditions,
+            particle, u_m_s=u,operating_conditions=system.operating_conditions,
             dt_s=dt_s, use_corrected_velocity=use_corrected,
         )
  
@@ -67,7 +90,10 @@ def step_particle(particle: Particle, system: DigestionSystem, t: float, dt_s: f
                 mark_particle_exit(particle, t)
  
  
-def run_population_simulation(system: DigestionSystem, meal: MealParameter, dt_s: float, max_t_s: float, entry_time_s: float = 0.0, starting_reactor: str = "R1 - Estomac") -> List[Particle]:
+def run_population_simulation(system: DigestionSystem, meal: MealParameter, dt_s: float, max_t_s: float,
+                               entry_time_s: float = 0.0, starting_reactor: str = "R1 - Estomac",
+                               inject_meal_volume: bool = False,
+                               record_volume_history: bool = True) -> SimulationResult:
     """
     Simule toute la population de particules d'un repas à travers le système, depuis entry_time_s jusqu'à leur sortie ou max_t_s
  
@@ -79,11 +105,37 @@ def run_population_simulation(system: DigestionSystem, meal: MealParameter, dt_s
     use_corrected_by_type = compute_settling_velocity_choices(meal.particles, system.operating_conditions)
     particles = generate_particles_from_meal(meal, entry_time_s=entry_time_s, starting_reactor=starting_reactor)
     reactors_by_name = {r.name: r for r in system.reactors}
+
+    volume_history: Dict[str, List[float]] = {"t": []}
+    if record_volume_history:
+        for r in system.reactors:
+            volume_history[r.name] = []
  
+    def _record_volumes(t_val: float) -> None:
+        volume_history["t"].append(t_val)
+        for r in system.reactors:
+            current = r.current_volume_ml if hasattr(r, "current_volume_ml") else r.volume
+            volume_history[r.name].append(current)
+ 
+    if record_volume_history:
+        _record_volumes(entry_time_s)
+
     t = entry_time_s
     while t < max_t_s and any(p.active for p in particles):
         t += dt_s
+
+        update_reactor_volumes(system, t, dt_s)
+
+        if inject_meal_volume:
+            inject_meal_into_stomach(system, meal, t, dt_s, meal_start_time_s=entry_time_s)
+
+        update_tubular_reactor_volumes(system, t, dt_s)
+
+
         for particle in particles:
             step_particle(particle, system, t, dt_s, use_corrected_by_type, reactors_by_name)
- 
-    return particles
+
+        if record_volume_history:
+            _record_volumes(t)
+
+    return SimulationResult(particles=particles, volume_history=volume_history)

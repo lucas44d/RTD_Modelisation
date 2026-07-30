@@ -65,7 +65,6 @@ def residence_time_summary(particles: List[Particle])-> Dict[str, float] :
         "std_dev_s": sigma
     }
 
-
 """
     Calcul l'histogramme de densité de la probabilité E(t)
     Retourne (bin_centers, E_values). L'intégrale de E(t) sur tout le domaine (somme des E_values*bin_width) vaut 1
@@ -119,3 +118,89 @@ def compute_F_t(taus: List[float], t_values: Optional[List[float]] = None, n_poi
         f_values.append(count/n_total)
 
     return list(t_values), f_values
+
+
+"""
+    Nombre brut de particules sorties par intervalle de temps 
+ 
+    Retourne (bin_starts, counts) où bin_starts[i] est le début de l'intervalle i
+    et counts[i] le nombre de particules dont tau_i tombe dans cet intervalle
+"""
+def compute_exit_count_histogram(taus: List[float], n_bins: int = 20) -> Tuple[List[float], List[int]]:
+    if not taus:
+        return [], []
+ 
+    t_min, t_max = min(taus), max(taus)
+    if t_min == t_max:
+        return [t_min], [len(taus)]
+ 
+    bin_width = (t_max - t_min) / n_bins
+    counts = [0] * n_bins
+    for tau in taus:
+        idx = int((tau - t_min) / bin_width)
+        idx = min(idx, n_bins - 1)  # inclut la valeur max dans le dernier bin
+        counts[idx] += 1
+ 
+    bin_starts = [t_min + i * bin_width for i in range(n_bins)]
+    return bin_starts, counts
+
+"""
+    Nombre cumulé de particules sorties au fil du temps, ex : 10 particules sorties à t=8000s, puis 15 au total à t=8500s, etc.
+ 
+    Retourne (t_values, cumulative_counts), triés par temps de sortie croissant.
+    cumulative_counts[i] = nombre de particules avec tau_j <= t_values[i]
+"""
+def compute_cumulative_exit_counts(taus: List[float]) -> Tuple[List[float], List[int]]:
+    
+    if not taus:
+        return [], []
+    sorted_taus = sorted(taus)
+    cumulative_counts = list(range(1, len(sorted_taus) + 1))
+    return sorted_taus, cumulative_counts
+
+"""
+    Regroupe une population de particules par type (densité, taille), pour comparer l'effet de ces propriétés sur le temps de résidence
+ 
+    Retourne {label: [particules de ce type]}, où label est une chaîne lisible générée à partir de la densité et du rayon (en mm).
+"""
+def group_particles_by_type(particles: List[Particle],label_format: str = "ρ={density:.0f} kg/m³, d={diameter_mm:.4f} mm") -> Dict[str, List[Particle]]:
+    groups: Dict[str, List[Particle]] = {}
+    for p in particles:
+        label = label_format.format(
+            density=p.particle_type.particle_density,
+            diameter_mm=p.particle_type.particle_size * 1000.0,
+        )
+        groups.setdefault(label, []).append(p)
+    return groups
+ 
+
+"""
+    Calcule la courbe de sorties cumulées séparément pour chaque type de particule, afin de les superposer sur un même graphique et 
+    comparer visuellement leur effet sur la vitesse de sortie du système
+ 
+    Retourne {label: (t_values, cumulative_counts)}.
+"""
+def compute_cumulative_exit_counts_by_group(particles: List[Particle]) -> Dict[str, Tuple[List[float], List[int]]]:
+   
+    groups = group_particles_by_type(particles)
+    result = {}
+    for label, group_particles in groups.items():
+        taus = collect_residence_times(group_particles)
+        result[label] = compute_cumulative_exit_counts(taus)
+    return result
+ 
+
+"""
+    Résumé statistique (moyenne, nombre terminé/total) par type de particule, pour un tableau ou une légende récapitulative
+"""
+def mean_residence_time_by_group(particles: List[Particle]) -> Dict[str, Dict[str, float]]:
+    groups = group_particles_by_type(particles)
+    result = {}
+    for label, group_particles in groups.items():
+        taus = collect_residence_times(group_particles)
+        result[label] = {
+            "n_total": len(group_particles),
+            "n_completed": len(taus),
+            "mean_residence_time_s": mean_residence_time(taus),
+        }
+    return result

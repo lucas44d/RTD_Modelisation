@@ -21,6 +21,9 @@ from .sedimentation import stokes_settling_velocity, corrected_settling_velocity
 GRAVITY_M_S2 = 9.81
 FEET_TO_M = 0.3048
 
+#coef empirique de couplage radial, plus il est grand, plus une particule qui sédimente fortement est ralentie
+RADIAL_COUPLING_STRENGTH = 0.006
+
 """
 Représentation d'une particule individuelle
 """
@@ -73,8 +76,18 @@ def update_position_tubular(particle: Particle, u_m_s: float, operating_conditio
         v_s = corrected_settling_velocity(particle.particle_type, operating_conditions)
     else:
         v_s = stokes_settling_velocity(particle.particle_type, operating_conditions)
-    particle.x += u_m_s * dt_s
+
+    u_local = _local_axial_velocity(u_m_s, v_s)
+
+    particle.x += u_local * dt_s
     particle.z -= v_s * dt_s
+
+""" Vitesse d'advection locale, ralentie en fonction du rapport |v_s|/u """
+def _local_axial_velocity(u_avg_m_s: float, v_s_m_s: float, k: float = RADIAL_COUPLING_STRENGTH) -> float:
+    if u_avg_m_s <= 0:
+        return 0.0
+    ratio = abs(v_s_m_s) / u_avg_m_s
+    return u_avg_m_s / (1.0 + k * ratio)
 
 
 """ Agitation / sortie stochastique en réacteur agité (R1, R2) """
