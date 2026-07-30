@@ -75,12 +75,29 @@ class TubularReactor(Reactor):
         volume_m3 = math.pi * (diameter_m / 2) ** 2 * length_m
         volume_ml = volume_m3 * M3_TO_ML
 
+        self.current_volume_ml = 0
+
         super().__init__(name, volume_ml)
 
     @property
     def volume(self) -> float:
         # Volume fixe
         return self._volume_ml
+
+    def add_inflow(self, inflow_ml: float) -> float:
+        """
+            Ajoute un apport de liquide au volume de remplissage courant du tube, jusqu'à sa capacité maximale. 
+            Retourne le surplus qui déborde une fois le tube plein
+        """
+        if inflow_ml <= 0:
+            return 0.0
+        new_volume = self.current_volume_ml + inflow_ml
+        if new_volume > self._volume_ml:
+            overflow = new_volume - self._volume_ml
+            self.current_volume_ml = self._volume_ml
+            return overflow
+        self.current_volume_ml = new_volume
+        return 0.0
 
 
 # Réacteurs agités (R1, R2), volume variable + agitation

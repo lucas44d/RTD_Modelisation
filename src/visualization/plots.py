@@ -5,12 +5,16 @@
 """
 
 from __future__ import annotations
-from typing import List, Optional
+from typing import List, Dict
 import math
 
 import matplotlib
 matplotlib.use("QtAgg")  # backend compatible PySide6
 from matplotlib.figure import Figure
+
+# Palette de couleurs distinctes pour comparer plusieurs groupes de particules
+_GROUP_COLORS = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#14b8a6", "#f97316"]
+ 
 
 """ Trace l'histogramme de la distribution des temps de résidence E(t) """
 def plot_residence_time_distribution(bin_centers: List[float], e_values: List[float]) -> Figure:
@@ -47,3 +51,101 @@ def plot_cumulative_distribution(t_values: List[float], f_values: List[float]) -
     ax.grid(True, alpha=0.3)
     fig.tight_layout()
     return fig
+
+
+"""
+    Trace le nombre brut de particules sorties par intervalle de temps
+"""
+def plot_exit_count_histogram(bin_starts: List[float], counts: List[int]) -> Figure:
+    fig = Figure(figsize=(6, 4))
+    ax = fig.add_subplot(111)
+ 
+    if bin_starts:
+        width = (bin_starts[1] - bin_starts[0]) if len(bin_starts) > 1 else 1.0
+        ax.bar(bin_starts, counts, width=width, align="edge", alpha=0.8,
+               color="#f59e0b", edgecolor="white")
+ 
+    ax.set_xlabel("Temps (s)")
+    ax.set_ylabel("Nombre de particules sorties")
+    ax.set_title("Particules sorties par intervalle de temps")
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+    return fig
+
+ 
+"""
+    Trace le nombre cumulé de particules sorties au fil du temps
+"""
+def plot_cumulative_exit_counts(t_values: List[float], counts: List[int]) -> Figure:
+    
+    fig = Figure(figsize=(6, 4))
+    ax = fig.add_subplot(111)
+ 
+    if t_values:
+        ax.step(t_values, counts, where="post", color="#8b5cf6", linewidth=2)
+        ax.fill_between(t_values, counts, step="post", alpha=0.1, color="#8b5cf6")
+ 
+    ax.set_xlabel("Temps (s)")
+    ax.set_ylabel("Nombre cumulé de particules sorties")
+    ax.set_title("Sorties cumulées du système")
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+    return fig
+
+def plot_volume_history(volume_history: Dict[str, List[float]]) -> Figure:
+    """
+    Trace l'évolution du volume de chaque réacteur (R1 à R5) au fil du
+    temps, cf. simulation.simulation.SimulationResult.volume_history.
+ 
+    R1/R2 : volume réel (bilan de matière, vidange/remplissage, cf.
+            simulation/volume_dynamics.py::update_reactor_volumes).
+    R3/R4/R5 : volume de remplissage (démarre à 0, tube vide, se remplit
+            jusqu'à la capacité maximale au fur et à mesure que le liquide
+            est poussé depuis l'amont, cf.
+            update_tubular_reactor_volumes).
+    """
+    fig = Figure(figsize=(7, 5))
+    ax = fig.add_subplot(111)
+ 
+    t_values = volume_history.get("t", [])
+    reactor_names = [k for k in volume_history.keys() if k != "t"]
+ 
+    for i, name in enumerate(reactor_names):
+        color = _GROUP_COLORS[i % len(_GROUP_COLORS)]
+        ax.plot(t_values, volume_history[name], color=color, linewidth=2, label=name)
+ 
+    ax.set_xlabel("Temps (s)")
+    ax.set_ylabel("Volume (mL)")
+    ax.set_title("Suivi des volumes du système")
+    if reactor_names:
+        ax.legend(fontsize=8, loc="best")
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+    return fig
+
+
+"""
+    Superpose les courbes de sorties cumulées de plusieurs types de particules sur un même graphique, 
+    pour comparer visuellement leur effet sur la vitesse de sortie du système.
+ 
+    grouped_data : {label: (t_values, counts)}, 
+"""
+def plot_cumulative_exit_counts_by_group(grouped_data: Dict[str, tuple]) -> Figure:
+    
+    fig = Figure(figsize=(7, 5))
+    ax = fig.add_subplot(111)
+ 
+    for i, (label, (t_values, counts)) in enumerate(sorted(grouped_data.items())):
+        color = _GROUP_COLORS[i % len(_GROUP_COLORS)]
+        if t_values:
+            ax.step(t_values, counts, where="post", color=color, linewidth=2, label=label)
+ 
+    ax.set_xlabel("Temps (s)")
+    ax.set_ylabel("Nombre cumulé de particules sorties")
+    ax.set_title("Comparaison des sorties cumulées par type de particule")
+    if grouped_data:
+        ax.legend(fontsize=8, loc="lower right")
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+    return fig
+ 
