@@ -15,7 +15,7 @@ from pathlib import Path
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
     QPushButton, QLabel, QDoubleSpinBox, QTableWidget, QTableWidgetItem,
-    QTabWidget, QGroupBox, QHeaderView, QMessageBox, QSplitter, QFileDialog,
+    QTabWidget, QGroupBox, QMessageBox, QSplitter, QFileDialog,
 )
 from PySide6.QtCore import Qt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
