@@ -4,13 +4,8 @@ On distingue deux familles de réacteurs, conformément aux hypothèses :
 - Réacteurs agités (CSTR) à volume variable: R1 (Estomac) et R2 (Préduodénum).
   Leur volume évolue dans le temps selon les débits entrants/sortants et ils comportent un système d'agitation dont la vitesse dépend parfois du volume courant.
 
-- Réacteurs tubulaires à volume fixe : R3 (Duodénum), R4 (Jéjunum),
-  R5 (Iléon / Stomie). Conformément à l'hypothèse de régime permanent dans la partie tubulaire,
+- Réacteurs tubulaires à volume fixe : R3 (Duodénum), R4 (Jéjunum), R5 (Iléon / Stomie). Conformément à l'hypothèse de régime permanent dans la partie tubulaire,
   leur volume est constant et calculé à partir de leur géométrie interne (longueur, diamètre interne).
-
-Note : Il est mentionné dans le CDC un diamètre interne 1/4 de pouce pour les tubulures de racords de plusieurs pompes, 
-doit-on prendre en compte ce diamètre pour le calcul du volume total du système ? 
-Si oui -> Quelle est la longueur de ces tubulures ? (pas trouvé dans le cdc)  
 """
 
 from __future__ import annotations

@@ -17,8 +17,6 @@ import matplotlib.pyplot as plt
 from src.models.system import DigestionSystem
 from src.dataImport.excel_loader import ExcelLoader
 from src.models.system import DigestionSystem
-from src.models.pump import hms_to_seconds
-from src.export.excel_exporter import ExcelExporter
 
 from src.simulation.simulation import run_population_simulation
 from src.simulation.rtd import (
@@ -26,11 +24,7 @@ from src.simulation.rtd import (
     collect_residence_times,
     compute_E_t,
     compute_F_t,
-    data_summary,
-    compute_cumulative_exit_counts_by_group,
-    mean_residence_time_by_group,
 )
-from src.simulation.flow import mean_residence_time_cstr
 from src.simulation.volume_dynamics import total_particle_volume_ml, water_volume_to_add_ml
 
 INCH_TO_M = 0.0254
@@ -42,7 +36,6 @@ def main():
     
     excel_path = base_dir / "resources" / "Test_import.xlsx"
     loader = ExcelLoader()
-    exporter = ExcelExporter()
     config = loader.load_configuration(excel_path)
     
  

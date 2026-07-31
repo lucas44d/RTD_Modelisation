@@ -4,7 +4,6 @@ Suivi dynamique du volume des réacteurs agités R1 (Estomac) et R2 (Préduodén
 """
 
 from __future__ import annotations
-from typing import Optional
 
 from models.system import DigestionSystem
 from models.meal_parameter import MealParameter
