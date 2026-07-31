@@ -9,7 +9,6 @@ Interface graphique PySide6 :
  
 from __future__ import annotations
 import sys
-import time
 from pathlib import Path 
  
 from PySide6.QtWidgets import (
@@ -22,7 +21,6 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
  
 from src.models.system import DigestionSystem
 from src.models.particle_type import ParticleType
-from src.models.meal_parameter import MealParameter
 from src.dataImport.excel_loader import ExcelLoader
 from src.export.export_excel import export_to_excel
  
@@ -35,6 +33,9 @@ from src.simulation.rtd import (
     compute_cumulative_exit_counts_by_group,
     compute_E_t,
     compute_F_t,
+    count_active_particles_by_reactor,
+    active_particle_positions_in_tubular,
+    get_tubular_reactor_lengths_m,
 )
  
 from visualization.plots import (
@@ -44,6 +45,8 @@ from visualization.plots import (
     plot_cumulative_exit_counts,
     plot_cumulative_exit_counts_by_group,
     plot_volume_history,
+    plot_active_particles_by_reactor,
+    plot_active_particle_positions,
 )
 
 """Tableau éditable des types de particules du repas"""
@@ -265,6 +268,14 @@ class MainWindow(QMainWindow):
         #Affichage du graphique de suivi des volumes
         self.volume_canvas = FigureCanvas(plot_volume_history({}))
         self.tabs.addTab(self.volume_canvas, "Suivi des volumes")
+
+        # Affichage des particules non sorties pour chaque réacteurs
+        self.active_by_reactor_canvas = FigureCanvas(plot_active_particles_by_reactor({}))
+        self.tabs.addTab(self.active_by_reactor_canvas, "Particules bloquées (par réacteur)")
+
+        # Affichage de la position des particules actives
+        self.active_positions_canvas = FigureCanvas(plot_active_particle_positions({}))
+        self.tabs.addTab(self.active_positions_canvas, "Position dans le tube")
  
         layout.addWidget(self.tabs)
         return panel
@@ -310,7 +321,7 @@ class MainWindow(QMainWindow):
         particle_types = simulation_init["particle_types"]
         system = simulation_init["system"]
         meal = simulation_init["meal"]
-        simulation_param = simulation_init["simulation_param"]
+        config = simulation_init["config"]
 
         if not particle_types:
             QMessageBox.warning(self, "Repas vide", "Ajoutez au moins un type de particule avant de lancer la simulation.")
@@ -321,6 +332,13 @@ class MainWindow(QMainWindow):
         QApplication.processEvents()  # rafraîchit l'UI avant le calcul (bloquant pour le code)
  
         try:
+            
+            system = DigestionSystem(
+                        config,
+                        initial_stomach_volume_ml=self.stomach_volume_spin.value(),
+                        initial_preduodenum_volume_ml=self.preduodenum_volume_spin.value(),
+                    )
+
             result = run_population_simulation(
                             system=system, meal=meal,
                             dt_s=self.dt_spin.value(),
@@ -328,7 +346,7 @@ class MainWindow(QMainWindow):
                             inject_meal_volume=False,  # volume initial de R1 inclut déjà le repas
                         )
             self._last_particles = result.particles
-            self._display_results(result.particles, result.volume_history)
+            self._display_results(result.particles, system, result.volume_history)
             self.status_label.setText("Simulation terminée.")
  
         except Exception as exc:  # affichage d'erreur plutôt qu'un crash
@@ -338,7 +356,7 @@ class MainWindow(QMainWindow):
         finally:
             self.run_button.setEnabled(True)
  
-    def _display_results(self, particles: list,  volume_history: dict) -> None:
+    def _display_results(self, particles: list, system: DigestionSystem,  volume_history: dict) -> None:
         summary = residence_time_summary(particles)
         taus = collect_residence_times(particles)
  
@@ -382,6 +400,16 @@ class MainWindow(QMainWindow):
         # Suivi des volumes du système (R1 à R5)
         fig_volumes = plot_volume_history(volume_history)
         self._replace_canvas(self.tabs, 5, fig_volumes, "Suivi des volumes")
+
+        # Particules non sorties
+        active_counts = count_active_particles_by_reactor(particles)
+        fig_active_by_reactor = plot_active_particles_by_reactor(active_counts)
+        self._replace_canvas(self.tabs, 6, fig_active_by_reactor, "Particules bloquées (par réacteur)")
+ 
+        reactor_lengths_m = get_tubular_reactor_lengths_m(system)
+        active_positions = active_particle_positions_in_tubular(particles, reactor_lengths_m)
+        fig_active_positions = plot_active_particle_positions(active_positions)
+        self._replace_canvas(self.tabs, 7, fig_active_positions, "Position dans le tube")
 
 
     @staticmethod
