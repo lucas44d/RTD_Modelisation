@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 from typing import List, Dict
-import math
+import random
 
 import matplotlib
 matplotlib.use("QtAgg")  # backend compatible PySide6
@@ -148,4 +148,55 @@ def plot_cumulative_exit_counts_by_group(grouped_data: Dict[str, tuple]) -> Figu
     ax.grid(True, alpha=0.3)
     fig.tight_layout()
     return fig
+
+def plot_active_particles_by_reactor(counts: Dict[str, int]) -> Figure:
+    """
+    Histogramme du nombre de particules encore actives (non sorties du
+    système) par réacteur 
+    Montre où les particules restent bloquées à la fin de la simulation.
+    """
+    fig = Figure(figsize=(6, 4))
+    ax = fig.add_subplot(111)
  
+    if counts:
+        names = sorted(counts.keys())
+        values = [counts[n] for n in names]
+        colors = [_GROUP_COLORS[i % len(_GROUP_COLORS)] for i in range(len(names))]
+        ax.bar(names, values, color=colors, edgecolor="white")
+        ax.tick_params(axis="x", rotation=20)
+ 
+    ax.set_ylabel("Nombre de particules actives (non sorties)")
+    ax.set_title("Particules non sorties, par réacteur")
+    ax.grid(True, alpha=0.3, axis="y")
+    fig.tight_layout()
+    return fig
+
+
+def plot_active_particle_positions(positions_by_reactor: Dict[str, List[float]]) -> Figure:
+    """
+    Position d'avancement des particules actives dans les réacteurs tubulaires R3/R4/R5: une ligne par réacteur, 
+    chaque particule représentée comme un point (fraction du réacteur parcourue, 0=entrée, 1=sortie)
+    """
+    fig = Figure(figsize=(7, 4))
+    ax = fig.add_subplot(111)
+ 
+    reactor_names = sorted(positions_by_reactor.keys())
+    rng = random.Random(0)  # jitter reproductible d'un affichage à l'autre
+ 
+    for i, name in enumerate(reactor_names):
+        fractions = positions_by_reactor[name]
+        if not fractions:
+            continue
+        y_jitter = [i + rng.uniform(-0.15, 0.15) for _ in fractions]
+        color = _GROUP_COLORS[i % len(_GROUP_COLORS)]
+        ax.scatter(fractions, y_jitter, alpha=0.6, s=20, color=color, label=name)
+ 
+    ax.set_yticks(range(len(reactor_names)))
+    ax.set_yticklabels(reactor_names)
+    ax.set_ylim(-0.5, len(reactor_names) - 0.5 if reactor_names else 0.5)
+    ax.set_xlabel("Fraction du réacteur parcourue (0 = entrée, 1 = sortie)")
+    ax.set_xlim(-0.05, 1.05)
+    ax.set_title("Position des particules actives dans les réacteurs tubulaires")
+    ax.grid(True, alpha=0.3, axis="x")
+    fig.tight_layout()
+    return fig

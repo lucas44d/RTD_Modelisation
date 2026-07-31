@@ -229,3 +229,39 @@ def compute_cumulative_exit_counts_excel(taus: List[float],) -> Tuple[List[float
         cumulative_counts.append(total_so_far)
 
     return unique_sorted_taus, cumulative_counts
+
+
+def count_active_particles_by_reactor(particles: List[Particle]) -> Dict[str, int]:
+    """
+    Compte le nombre de particules encore actives (non sorties du système) par réacteur où elles se trouvent actuellement
+    Utile pour voir où les particules restent bloquées à la fin de la fenêtre de simulation
+    """
+    counts: Dict[str, int] = {}
+    for p in particles:
+        if p.active:
+            counts[p.current_reactor] = counts.get(p.current_reactor, 0) + 1
+    return counts
+ 
+ 
+def active_particle_positions_in_tubular(particles: List[Particle], reactor_lengths_m: Dict[str, float]) -> Dict[str, List[float]]:
+    """
+    Pour les particules encore actives dans un réacteur tubulaire (R3/R4/R5), retourne leur position x (fraction du réacteur parcourue : 0 = entrée, 1 = sortie), regroupée par réacteur.
+ 
+    reactor_lengths_m : {nom_reacteur: longueur_m}
+    """
+    positions: Dict[str, List[float]] = {}
+    for p in particles:
+        if p.active and p.current_reactor in reactor_lengths_m:
+            length = reactor_lengths_m[p.current_reactor]
+            fraction = (p.x / length) if length > 0 else 0.0
+            positions.setdefault(p.current_reactor, []).append(min(max(fraction, 0.0), 1.0))
+    return positions
+ 
+ 
+def get_tubular_reactor_lengths_m(system) -> Dict[str, float]:
+    """
+    Construit {nom_reacteur: longueur_m} pour les réacteurs tubulaires (R3, R4, R5) d'un DigestionSystem, à passer à active_particle_positions_in_tubular().
+    """
+    from models.reactor import FEET_TO_M
+    tubular_reactors = [system.r3_duodenum, system.r4_jejunum, system.r5_ileon_or_stomie]
+    return {r.name: r.length_ft * FEET_TO_M for r in tubular_reactors}
