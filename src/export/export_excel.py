@@ -1,22 +1,15 @@
 """
-Export des résultats de simulation vers un fichier Excel multi-feuilles,
-conformément à la section 6 du cahier des charges (« Export des résultats
-(Excel ou autre format simple) »).
+Export des résultats de simulation vers un fichier Excel multi-feuilles
  
 Feuilles produites :
-    - Particules            : détail individuel (densité, taille, tau_i...)
-    - Resume                 : statistiques globales (increment 3.5)
-    - Comparaison_taille      : moyenne par type de particule (densité/taille)
-    - E_t / F_t               : distribution des temps de résidence (5.4)
-    - Histogramme_sorties     : nombre brut de sorties par intervalle
-    - Sorties_cumulees        : nombre cumulé de sorties au fil du temps
-    - Volumes                 : historique des volumes R1-R5 (si fourni)
-    - Parametres              : configuration de la simulation (si fournie)
- 
-Chaque feuille de données est accompagnée d'un graphique natif Excel
-correspondant (LineChart/BarChart, cf. openpyxl.chart), pour que les
-graphiques soient directement visibles et modifiables dans Excel, et se
-conservent avec le classeur.
+    - Particules : détail individuel (densité, taille, tau_i...)
+    - Resume : statistiques globales (increment 3.5)
+    - Comparaison_taille : moyenne par type de particule (densité/taille)
+    - E_t / F_t : distribution des temps de résidence (5.4)
+    - Histogramme_sorties : nombre brut de sorties par intervalle
+    - Sorties_cumulees : nombre cumulé de sorties au fil du temps
+    - Volumes : historique des volumes R1-R5 (si fourni)
+    - Parametres : configuration de la simulation (si fournie)
 """
 
 
@@ -35,7 +28,7 @@ from simulation.rtd import (
     compute_E_t,
     compute_F_t,
     compute_exit_count_histogram,
-    compute_cumulative_exit_counts,
+    compute_cumulative_exit_counts_excel,
     mean_residence_time_by_group,
 )
 
@@ -96,7 +89,7 @@ def _distribution_dataframes(particles: List[Particle], n_bins: int = 20) -> Dic
     bin_starts, counts = compute_exit_count_histogram(taus, n_bins=n_bins)
     df_hist = pd.DataFrame({"debut_intervalle_s": bin_starts, "nombre_sorties": counts})
  
-    t_cum, cum_counts = compute_cumulative_exit_counts(taus)
+    t_cum, cum_counts = compute_cumulative_exit_counts_excel(taus)
     df_cum = pd.DataFrame({"temps_s": t_cum, "nombre_cumule_sorties": cum_counts})
  
     return {

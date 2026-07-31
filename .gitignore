@@ -28,3 +28,11 @@ dist/
 
 # Jupyter
 .ipynb_checkpoints/
+
+
+# Fichiers temporaires Excel
+~$*.xlsx
+~$*.xls
+
+# Fichiers de données générés (si tu ne souhaites pas versionner les résultats bruts)
+data/*.xlsx

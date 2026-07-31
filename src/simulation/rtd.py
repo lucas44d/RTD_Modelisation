@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 import math
+from collections import Counter
 from typing import List, Dict, Tuple, Optional
  
 from .particle_motion import Particle
@@ -204,3 +205,27 @@ def mean_residence_time_by_group(particles: List[Particle]) -> Dict[str, Dict[st
             "mean_residence_time_s": mean_residence_time(taus),
         }
     return result
+
+
+"""
+    Fonction alternative pour afficher les billes sorties cumulées via excel
+"""
+def compute_cumulative_exit_counts_excel(taus: List[float],) -> Tuple[List[float], List[int]]:
+    if not taus:
+        return [], []
+
+    # On compte combien de billes sortent à chaque pas de temps exact
+    counts_per_time = Counter(taus)
+
+    # On trie les temps uniques
+    unique_sorted_taus = sorted(counts_per_time.keys())
+
+    # On calcule le cumul sur ces temps uniques
+    cumulative_counts = []
+    total_so_far = 0
+
+    for t in unique_sorted_taus:
+        total_so_far += counts_per_time[t]
+        cumulative_counts.append(total_so_far)
+
+    return unique_sorted_taus, cumulative_counts
