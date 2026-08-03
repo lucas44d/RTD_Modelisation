@@ -430,7 +430,7 @@ def simulation_initialization():
     current_file = Path(__file__).resolve()
     base_dir = next(p for p in current_file.parents if (p / "resources").is_dir())
 
-    excel_path = base_dir / "resources" / "Test_import.xlsx"
+    excel_path = base_dir / "resources" / "data_import.xlsx"
 
     loader = ExcelLoader()
     config = loader.load_configuration(excel_path)
