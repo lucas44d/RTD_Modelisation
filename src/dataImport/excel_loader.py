@@ -59,7 +59,7 @@ class ExcelLoader:
         particles = self._load_particles(filename, particle_sheet)
         
         return MealParameter(
-            meal_flow = row ["Débit d'entrée de repas"],
+            meal_flow = row ["Débit d'entrée de repas ml/min"],
             meal_entry_period = row ["Période d'entrée de repas"],
             viscosity = row ["Viscosité"],
             total=row["Total particules"],

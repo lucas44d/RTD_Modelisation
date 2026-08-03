@@ -46,9 +46,9 @@ def inject_meal_into_stomach(system: DigestionSystem, meal: MealParameter, t_s: 
     défini par les paramètres du repas lui-même. À appeler une fois par pas de temps, en plus de update_reactor_volumes().
     """
     meal_end_time_s = meal_start_time_s + meal.meal_entry_period
+    
     if meal_start_time_s <= t_s < meal_end_time_s:
         system.r1_stomach.add_volume(meal.meal_flow / 60.0 * dt_s)
-
 
 def total_particle_volume_ml(meal: MealParameter) -> float:
     """
