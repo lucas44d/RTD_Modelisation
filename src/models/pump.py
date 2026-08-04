@@ -302,7 +302,7 @@ def build_transfer_pumps() -> dict:
         ],
     }
     return {
-        name: FlowPump.from_hms_table(f"Pompe de transfert {name}", rows, hold_last_segment=False)
+        name: FlowPump.from_hms_table(f"Pompe de transfert {name}", rows, hold_last_segment=True)
         for name, rows in tables.items()
     }
  
