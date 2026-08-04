@@ -161,7 +161,7 @@ def run_population_simulation(system: DigestionSystem, meal: MealParameter, dt_s
             _record_volumes(t)
 
         
-        # Arrêt anticipé si le système est devenu stagnant (cf. docstring).
+        # Arrêt anticipé si le système est devenu stagnant
         if _system_is_flowing(system, t):
             system_has_flowed = True
         elif system_has_flowed:

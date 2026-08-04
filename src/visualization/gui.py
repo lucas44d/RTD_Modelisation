@@ -137,6 +137,7 @@ class MainWindow(QMainWindow):
 
         meal = simulation_init["meal"]
         simulation_param = simulation_init["simulation_param"]
+        print()
         particle_types = simulation_init["particle_types"]
 
         # Paramètres de simulation 
@@ -145,8 +146,10 @@ class MainWindow(QMainWindow):
  
         self.duration_spin = QDoubleSpinBox()
         self.duration_spin.setRange(1.0, 1_000_000.0)
-        self.duration_spin.setValue(simulation_param.simulation_duration)
-        self.duration_spin.setSuffix(" s")
+        self.duration_spin.blockSignals(True)
+        self.duration_spin.setValue(int(simulation_param.simulation_duration / 60))
+        self.duration_spin.blockSignals(False)        
+        self.duration_spin.setSuffix(" min")
         sim_form.addRow("Durée de simulation :", self.duration_spin)
  
         self.dt_spin = QDoubleSpinBox()
@@ -180,9 +183,9 @@ class MainWindow(QMainWindow):
         meal_form.addRow("Débit d'entrée du repas :", self.meal_flow_spin)
  
         self.meal_period_spin = QDoubleSpinBox()
-        self.meal_period_spin.setRange(0.0, 3600.0)
-        self.meal_period_spin.setValue(meal.meal_entry_period)
-        self.meal_period_spin.setSuffix(" s")
+        self.meal_period_spin.setRange(0.0, 60.0)
+        self.meal_period_spin.setValue(meal.meal_entry_period / 60.0)  # converti en minutes pour l'affichage
+        self.meal_period_spin.setSuffix(" min")
         meal_form.addRow("Période d'entrée du repas :", self.meal_period_spin)
  
         self.viscosity_spin = QDoubleSpinBox()
@@ -232,7 +235,8 @@ class MainWindow(QMainWindow):
  
         layout.addStretch()
         return panel
- 
+    
+    
     # Panneau de résultats
     def _build_results_panel(self) -> QWidget:
         panel = QWidget()
@@ -342,7 +346,7 @@ class MainWindow(QMainWindow):
             result = run_population_simulation(
                             system=system, meal=meal,
                             dt_s=self.dt_spin.value(),
-                            max_t_s=self.duration_spin.value(),
+                            max_t_s=self.duration_spin.value() * 60,  # converti en secondes
                             inject_meal_volume=False,  # volume initial de R1 inclut déjà le repas
                         )
             self._last_particles = result.particles

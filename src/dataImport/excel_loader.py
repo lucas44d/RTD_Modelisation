@@ -23,7 +23,7 @@ class ExcelLoader:
             enzyme_volume = row["Volume enzyme (ml)"],
             enzyme_flow=row["Débit d'entrée enzyme"],
             enzyme_entry_period=row["Période d'entrée enzyme"],                
-            simulation_duration=row["Durée totale de simulation"],
+            simulation_duration=row["Durée totale de simulation (min)"] *60,  # converti en secondes
             time_step=row["Pas de temps"],
             transition_flow=row["Débit de transition"]
         )
@@ -60,7 +60,7 @@ class ExcelLoader:
         
         return MealParameter(
             meal_flow = row ["Débit d'entrée de repas ml/min"],
-            meal_entry_period = row ["Période d'entrée de repas"],
+            meal_entry_period = row ["Période d'entrée de repas (min)"] *60, # converti en secondes
             viscosity = row ["Viscosité"],
             total=row["Total particules"],
             particles = particles.copy()
