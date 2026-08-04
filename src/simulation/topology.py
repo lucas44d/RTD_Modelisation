@@ -20,9 +20,10 @@ from src.models.system import DigestionSystem
 
 DEFAULT_ADDITIONAL_INFLOWS = {
     "R2 - Préduodénum": ["C1", "C2", "C3"],
-    "R4 - Jéjunum": ["E1"],
-    "R5 - Iléon": ["E1"],
-    "R5 - Stomie": ["E1"],
+    "R3 - Duodénum": ["T.R3"],
+    "R4 - Jéjunum": ["E1", "T.R3"],
+    "R5 - Iléon": ["E1", "T.R3"],
+    "R5 - Stomie": ["E1", "T.R3"],
 }
 
 def reactor_inflow_rate(system: DigestionSystem, reactor_name: str, t_s: float, extra_inflows: Optional[List[str]] = None, use_default_additional_inflows: bool = True) -> float:
@@ -49,7 +50,11 @@ def reactor_inflow_rate(system: DigestionSystem, reactor_name: str, t_s: float, 
         inflow_pumps += extra_inflows
  
     for pump_name in inflow_pumps:
-        base += system.digestive_pumps[pump_name].flow_rate_at(t_s)
+        if pump_name in system.transfer_pumps:
+            base += system.transfer_pumps[pump_name].flow_rate_at(t_s)
+        else:
+            base += system.digestive_pumps[pump_name].flow_rate_at(t_s)
+ 
  
     return base
 

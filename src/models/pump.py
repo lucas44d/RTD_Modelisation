@@ -301,8 +301,16 @@ def build_transfer_pumps() -> dict:
             ("01:13:00", "04:30:00", 5, 985),
         ],
     }
-    return {
-        name: FlowPump.from_hms_table(f"Pompe de transfert {name}", rows, hold_last_segment=True)
+    pumps = {
+        name: FlowPump.from_hms_table(f"Pompe de transfert {name}", rows,hold_last_segment=False)
         for name, rows in tables.items()
     }
+    pumps["T.R3"] = FlowPump.from_hms_table(
+        "Pompe va-et-vient volumétrique T.R3",
+        [("00:45:00", "05:00:00", 600, None)],
+        hold_last_segment=False,
+    )
+
+    return pumps
+
  

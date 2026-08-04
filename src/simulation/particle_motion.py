@@ -22,7 +22,7 @@ GRAVITY_M_S2 = 9.81
 FEET_TO_M = 0.3048
 
 #coef empirique de couplage radial, plus il est grand, plus une particule qui sédimente fortement est ralentie
-RADIAL_COUPLING_STRENGTH = 0.006
+RADIAL_COUPLING_STRENGTH = 0.1
 
 """
 Représentation d'une particule individuelle
