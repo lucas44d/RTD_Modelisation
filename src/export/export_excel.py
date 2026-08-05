@@ -62,6 +62,26 @@ def _group_summary_to_dataframe(particles: List[Particle]) -> pd.DataFrame:
         })
     return pd.DataFrame(rows)
 
+def _cumulative_by_group_to_dataframe(particles: List[Particle]) -> pd.DataFrame:
+    """
+    Génère un DataFrame avec les courbes de sorties cumulées pour chaque groupe (densité/taille).
+    """
+    from simulation.rtd import group_particles_by_type, collect_residence_times, compute_cumulative_exit_counts_excel
+
+    groups = group_particles_by_type(particles)
+    data = {}
+
+    for label, group_particles in groups.items():
+        taus = collect_residence_times(group_particles)
+        t_cumul, cumul_counts = compute_cumulative_exit_counts_excel(taus)
+        
+        # On crée 2 colonnes par groupe : Temps et Nombre cumulé
+        data[f"Temps_{label}"] = t_cumul
+        data[f"Cumul_{label}"] = cumul_counts
+
+    # On aligne les colonnes de longueurs différentes avec du vide (NaN)
+    df = pd.DataFrame(dict([(k, pd.Series(v)) for k, v in data.items()]))
+    return df
 
 def _distribution_dataframes(particles: List[Particle], n_bins: int = 30) -> Dict[str, pd.DataFrame]:
     taus = collect_residence_times(particles)
@@ -78,9 +98,8 @@ def _distribution_dataframes(particles: List[Particle], n_bins: int = 30) -> Dic
     return {
         "Histogramme_sorties": df_hist,
         "Sorties_cumulees": df_cumul,
-        "Particules_actives": df_active
+        "Particules_actives": df_active,
     }
-
 
 def _volume_history_to_dataframe(volume_history: Dict[str, List[float]]) -> pd.DataFrame:
     return pd.DataFrame(volume_history)
@@ -96,6 +115,7 @@ def export_to_excel(filepath: str, particles: List[Particle],
         _particles_to_dataframe(particles).to_excel(writer, sheet_name="Particules", index=False)
         _summary_to_dataframe(particles).to_excel(writer, sheet_name="Resume", index=False)
         _group_summary_to_dataframe(particles).to_excel(writer, sheet_name="Comparaison_taille", index=False)
+        _cumulative_by_group_to_dataframe(particles).to_excel(writer, sheet_name="Cumul_par_groupe", index=False)
 
         for name, df in _distribution_dataframes(particles, n_bins=n_bins).items():
             df.to_excel(writer, sheet_name=name, index=False)
@@ -146,6 +166,39 @@ def _add_line_chart(ws, title: str, x_title: str, y_title: str,
     chart.set_categories(cats)
     ws.add_chart(chart, anchor)
 
+def _add_multi_line_chart(ws, title: str, x_title: str, y_title: str, anchor: str = "F2") -> None:
+    if ws.max_row < 2 or ws.max_column < 2:
+        return
+
+    chart = LineChart()
+    chart.title = title
+    chart.x_axis.title = x_title
+    chart.y_axis.title = y_title
+    chart.style = 13  # Style propre OpenPyXL
+
+    n_rows = ws.max_row
+    n_cols = ws.max_column
+
+    # Dans notre DataFrame, les colonnes vont par paires :
+    # Col 1: Temps (Groupe 1), Col 2: Cumul (Groupe 1)
+    # Col 3: Temps (Groupe 2), Col 4: Cumul (Groupe 2)...
+    for col in range(1, n_cols + 1, 2):
+        if col + 1 > n_cols:
+            break
+            
+        time_col = col
+        data_col = col + 1
+
+        # Données Y (Nombre cumulé)
+        data = Reference(ws, min_col=data_col, max_col=data_col, min_row=1, max_row=n_rows)
+        # Axe X (Temps min)
+        cats = Reference(ws, min_col=time_col, min_row=2, max_row=n_rows)
+
+        chart.add_data(data, titles_from_data=True)
+        # Note : On applique les catégories sur la dernière série ajoutée
+        chart.series[-1].graphicalProperties.line.width = 25000  # Épaisseur de ligne
+
+    ws.add_chart(chart, anchor)
 
 def _add_bar_chart(ws, title: str, x_title: str, y_title: str,
                    n_rows: int, data_col: int, cat_col: int = 1,
@@ -184,6 +237,16 @@ def _apply_formatting_and_charts(filepath: str, has_volumes: bool) -> None:
         ws = wb["Sorties_cumulees"]
         _add_line_chart(ws, "Sorties cumulées du système", "Temps (min)", "Nombre cumulé",
                          n_rows=ws.max_row, data_col=2)
+
+    if "Cumul_par_groupe" in wb.sheetnames:
+        ws = wb["Cumul_par_groupe"]
+        _add_multi_line_chart(
+            ws, 
+            title="Sorties cumulées par type de particule (taille/densité)", 
+            x_title="Temps (min)", 
+            y_title="Nombre cumulé de sorties", 
+            anchor="F2"
+        )
 
     if "Particules_actives" in wb.sheetnames:
         ws = wb["Particules_actives"]
