@@ -369,8 +369,8 @@ class MainWindow(QMainWindow):
             text = (
                 f"<b>{summary['n_completed']} / {summary['n_total']}</b> particules ont terminé leur traversée "
                 f"({summary['completion_rate'] * 100:.0f}%).<br>"
-                f"Temps de résidence moyen (tau) : <b>{summary['mean_residence_time_s']:.1f} s</b> "
-                f"Variance (σ²) : {summary['variance_s2']:.1f} s² | Écart-type : {summary['std_dev_s']:.1f} s"
+                f"Temps de résidence moyen (tau) : <b>{summary['mean_residence_time_min']:.1f} min</b> "
+                f"Variance (σ²) : {summary['variance_min2']:.1f} min² | Écart-type : {summary['std_dev_min']:.1f} min"
             )
         else:
             text = "Aucune particule n'a terminé sa traversée dans la fenêtre de simulation choisie."

@@ -48,11 +48,11 @@ class Particle:
     active: bool = True
 
     @property
-    def residence_time_s(self) -> Optional[float]:
+    def residence_time_min(self) -> Optional[float]:
         """Temps de résidence individuel tau_i = t_sortie - t_entrée"""
         if self.exit_time_s is None:
             return None
-        return self.exit_time_s - self.entry_time_s
+        return (self.exit_time_s - self.entry_time_s) / 60.0
 
 
 """Génère les particules individuellement sans stocker toute la population en mémoire"""

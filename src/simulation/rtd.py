@@ -16,7 +16,7 @@ from .particle_motion import Particle
     On ne prend pas en compte les particules n'ayant pas terminé la traversée (si temps de résidence = nulle)
 """
 def collect_residence_times(particles: List[Particle]) -> List[float]:
-    return [p.residence_time_s for p in particles if p.residence_time_s is not None]
+    return [p.residence_time_min for p in particles if p.residence_time_min is not None]
 
 """
     Calcul le temps de résidence moyen, retourne NaN (Not a Number) si aucune particule n'a terminé (taus est vide)
@@ -61,9 +61,9 @@ def residence_time_summary(particles: List[Particle])-> Dict[str, float] :
         "n_completed": n_completed,
         "n_active": n_active,
         "completion_rate": (n_completed / n_total) if n_total else float("nan"),
-        "mean_residence_time_s": tau_bar,
-        "variance_s2": sigma2,
-        "std_dev_s": sigma
+        "mean_residence_time_min": tau_bar,
+        "variance_min2": sigma2,
+        "std_dev_min": sigma
     }
 
 """
@@ -202,7 +202,7 @@ def mean_residence_time_by_group(particles: List[Particle]) -> Dict[str, Dict[st
         result[label] = {
             "n_total": len(group_particles),
             "n_completed": len(taus),
-            "mean_residence_time_s": mean_residence_time(taus),
+            "mean_residence_time_min": mean_residence_time(taus),
         }
     return result
 
@@ -215,7 +215,7 @@ def compute_cumulative_exit_counts_excel(taus: List[float],) -> Tuple[List[float
         return [], []
 
     # On compte combien de billes sortent à chaque pas de temps exact
-    counts_per_time = Counter(taus)
+    counts_per_time = Counter(taus)  # Convertir en minutes pour
 
     # On trie les temps uniques
     unique_sorted_taus = sorted(counts_per_time.keys())

@@ -13,7 +13,7 @@ from simulation.topology import cstr_outflow_rate
 R1_INFLOW_PUMPS = [ "A3", "A4", "B1", "B3"]
 
 # Pompes de dosage qui alimentent directement R2 
-R2_INFLOW_PUMPS = ["C1", "C2", "C3"]
+R2_INFLOW_PUMPS = ["C1", "C2", "C3", "AD1"]
 
 
 def update_reactor_volumes(system: DigestionSystem, t_s: float, dt_s: float) -> None:

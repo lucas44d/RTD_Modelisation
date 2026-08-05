@@ -257,7 +257,6 @@ def build_digestive_solution_pumps() -> dict:
     On a donc [temps_debut, temps_fin, debit_mL_min, volume_final_mL] pour chaque segment de débit constant.
     """
     tables = {
-        "A1.2": [("00:00:00", "00:10:00", 50, 500)], #modifier pour que ca corresponde au débit/période entrée du repas
         "A3": [("00:00:00", "00:04:00", 10.00, 40)],
         "A4": [
             ("00:03:00", "00:04:00", 5.00, 5),
@@ -278,6 +277,8 @@ def build_digestive_solution_pumps() -> dict:
         "C2": [("00:04:00", "02:34:00", 0.20, 30)],
         "C3": [("00:00:00", "00:04:00", 5.00, 20)],
         "E1": [("00:24:00", "03:34:00", 0.30, 57)],
+        #Pompe pour ajouter de l'eau une fois les liquides digestifs terminés
+        "AD1": [("02:38:00", "08:38:00", 5.0, 1800)], 
     }
     return {
         name: FlowPump.from_hms_table(f"Pompe {name}", rows)
