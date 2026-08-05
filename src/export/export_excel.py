@@ -25,11 +25,10 @@ from simulation.particle_motion import Particle
 from simulation.rtd import (
     residence_time_summary,
     collect_residence_times,
-    compute_E_t,
-    compute_F_t,
     compute_exit_count_histogram,
     compute_cumulative_exit_counts_excel,
     mean_residence_time_by_group,
+    count_active_particles_by_reactor,
 )
 
 
@@ -72,31 +71,29 @@ def _group_summary_to_dataframe(particles: List[Particle]) -> pd.DataFrame:
             "type_particule": label,
             "n_total": stats["n_total"],
             "n_sorties": stats["n_completed"],
+            "n_restantes": stats["n_total"] - stats["n_completed"],
+            "pourcentage_restantes": (stats["n_total"] - stats["n_completed"]) / stats["n_total"] * 100.0 if stats["n_total"] > 0 else None,
             "temps_residence_moyen_s": stats["mean_residence_time_s"],
         })
     return pd.DataFrame(rows)
  
  
-def _distribution_dataframes(particles: List[Particle], n_bins: int = 20) -> Dict[str, pd.DataFrame]:
+def _distribution_dataframes(particles: List[Particle], n_bins: int = 30) -> Dict[str, pd.DataFrame]:
     taus = collect_residence_times(particles)
- 
-    bin_centers, e_values = compute_E_t(taus, n_bins=n_bins)
-    df_et = pd.DataFrame({"temps_s": bin_centers, "E_t": e_values})
- 
-    t_values, f_values = compute_F_t(taus, n_points=100)
-    df_ft = pd.DataFrame({"temps_s": t_values, "F_t": f_values})
  
     bin_starts, counts = compute_exit_count_histogram(taus, n_bins=n_bins)
     df_hist = pd.DataFrame({"debut_intervalle_s": bin_starts, "nombre_sorties": counts})
  
-    t_cum, cum_counts = compute_cumulative_exit_counts_excel(taus)
-    df_cum = pd.DataFrame({"temps_s": t_cum, "nombre_cumule_sorties": cum_counts})
+    t_cumul, cumul_counts = compute_cumulative_exit_counts_excel(taus)
+    df_cumul = pd.DataFrame({"temps_s": t_cumul, "nombre_cumule_sorties": cumul_counts})
+
+    active_counts = count_active_particles_by_reactor(particles)
+    df_active = pd.DataFrame(list(active_counts.items()), columns=["Réacteur", "Nombre de particules actives"])
  
     return {
-        "E_t": df_et,
-        "F_t": df_ft,
         "Histogramme_sorties": df_hist,
-        "Sorties_cumulees": df_cum,
+        "Sorties_cumulees": df_cumul,
+        "Particules_actives": df_active
     }
  
  
@@ -193,16 +190,6 @@ def _apply_formatting_and_charts(filepath: str, has_volumes: bool) -> None:
     for ws in wb.worksheets:
         _style_sheet(ws)
  
-    if "E_t" in wb.sheetnames:
-        ws = wb["E_t"]
-        _add_bar_chart(ws, "Distribution des temps de résidence E(t)", "Temps (s)", "E(t)",
-                        n_rows=ws.max_row, data_col=2)
- 
-    if "F_t" in wb.sheetnames:
-        ws = wb["F_t"]
-        _add_line_chart(ws, "Fonction cumulée F(t)", "Temps (s)", "F(t)",
-                         n_rows=ws.max_row, data_col=2)
- 
     if "Histogramme_sorties" in wb.sheetnames:
         ws = wb["Histogramme_sorties"]
         _add_bar_chart(ws, "Particules sorties par intervalle", "Temps (s)", "Nombre de particules",
@@ -212,6 +199,11 @@ def _apply_formatting_and_charts(filepath: str, has_volumes: bool) -> None:
         ws = wb["Sorties_cumulees"]
         _add_line_chart(ws, "Sorties cumulées du système", "Temps (s)", "Nombre cumulé",
                          n_rows=ws.max_row, data_col=2)
+
+    if "Particules_actives" in wb.sheetnames:
+        ws = wb["Particules_actives"]
+        _add_bar_chart(ws, "Particules actives par réacteur", "Réacteur", "Nombre de particules actives",
+                        n_rows=ws.max_row, data_col=2)
  
     if has_volumes and "Volumes" in wb.sheetnames:
         ws = wb["Volumes"]

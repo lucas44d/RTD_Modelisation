@@ -7,10 +7,10 @@ from __future__ import annotations
 
 from models.system import DigestionSystem
 from models.meal_parameter import MealParameter
-
+from simulation.topology import cstr_outflow_rate
 
 # Pompes de dosage qui alimentent directement R1
-R1_INFLOW_PUMPS = ["A3", "A4", "B1", "B3"]
+R1_INFLOW_PUMPS = [ "A3", "A4", "B1", "B3"]
 
 # Pompes de dosage qui alimentent directement R2 
 R2_INFLOW_PUMPS = ["C1", "C2", "C3"]
@@ -25,15 +25,15 @@ def update_reactor_volumes(system: DigestionSystem, t_s: float, dt_s: float) -> 
     """
     # R1 : Estomac 
     r1_in_ml_min = sum(system.digestive_pumps[name].flow_rate_at(t_s) for name in R1_INFLOW_PUMPS)
-    r1_out_ml_min = system.transfer_pumps["T1"].flow_rate_at(t_s)
+    r1_out_ml_min = cstr_outflow_rate(system, "R1 - Estomac", t_s)
     net_r1_ml_min = r1_in_ml_min - r1_out_ml_min
     system.r1_stomach.add_volume(net_r1_ml_min / 60.0 * dt_s)
 
     # R2 : Préduodénum
-    r2_in_ml_min = system.transfer_pumps["T1"].flow_rate_at(t_s) + sum(
+    r2_in_ml_min = cstr_outflow_rate(system, "R1 - Estomac", t_s) + sum(
         system.digestive_pumps[name].flow_rate_at(t_s) for name in R2_INFLOW_PUMPS
     )
-    r2_out_ml_min = system.transfer_pumps["T2"].flow_rate_at(t_s)
+    r2_out_ml_min = cstr_outflow_rate(system, "R2 - Préduodénum", t_s)
     net_r2_ml_min = r2_in_ml_min - r2_out_ml_min
     system.r2_preduodenum.add_volume(net_r2_ml_min / 60.0 * dt_s)
 
@@ -77,7 +77,7 @@ def update_tubular_reactor_volumes(system: DigestionSystem, t_s: float, dt_s: fl
     Retourne le volume (mL) qui a fini par sortir du système via R5 sur ce
     pas de temps (utile pour un futur suivi du débit de sortie global).
     """
-    inflow_r3_ml = system.transfer_pumps["T2"].flow_rate_at(t_s) / 60.0 * dt_s
+    inflow_r3_ml = cstr_outflow_rate(system, "R2 - Préduodénum", t_s) / 60.0 * dt_s
     overflow_r3_ml = system.r3_duodenum.add_inflow(inflow_r3_ml)
  
     inflow_r4_ml = overflow_r3_ml + system.digestive_pumps["E1"].flow_rate_at(t_s) / 60.0 * dt_s

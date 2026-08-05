@@ -1,12 +1,12 @@
 from __future__ import annotations
-from typing import List, Dict, Callable, Optional
+from typing import List, Dict
 from dataclasses import dataclass, field
 
 from src.models.system import DigestionSystem
 from src.models.particle_type import ParticleType
 from src.models.meal_parameter import MealParameter
 
-from .topology import tubular_velocity_at, cstr_outflow_rate
+from .topology import tubular_velocity_at, cstr_outflow_rate, reactor_inflow_rate
 from .particle_motion import (
     Particle,
     generate_particles_from_meal,
@@ -56,7 +56,26 @@ def compute_settling_velocity_choices(particle_types: List[ParticleType], operat
         valide = is_stokes_regime_valid(vs, pt, operating_conditions)
         choices[id(pt)] = not valide
     return choices
+
+
+"""
+    Indique si un débit non nul existe encore quelque part dans le système à l'instant t_s 
+    (R1->R2 via T1, R2->R3/R4/R5 via T2, ou injections secondaires comme E1 dans R4/R5)
  
+    Sert à détecter que le système a atteint un état stagnant : dans cet
+    état, aucune particule active ne peut plus jamais bouger, donc
+    continuer la simulation jusqu'à max_t_s ne changerait plus rien
+    """
+def _system_is_flowing(system: DigestionSystem, t_s: float) -> bool:
+    if cstr_outflow_rate(system, "R1 - Estomac", t_s) > 0:
+        return True
+    if cstr_outflow_rate(system, "R2 - Préduodénum", t_s) > 0:
+        return True
+    for reactor_name in TUBULAR_CHAIN_NAMES:
+        if reactor_inflow_rate(system, reactor_name, t_s) > 0:
+            return True
+    return False
+
 
 """Fait avancer une particule d'un pas de temps dt_s, au temps t"""
 def step_particle(particle: Particle, system: DigestionSystem, t: float, dt_s: float, use_corrected_by_type: Dict[int, bool], reactors_by_name: dict) -> None:
@@ -78,7 +97,7 @@ def step_particle(particle: Particle, system: DigestionSystem, t: float, dt_s: f
         u = tubular_velocity_at(system, reactor, t)
         use_corrected = use_corrected_by_type.get(id(particle.particle_type), False)
         update_position_tubular(
-            particle, u_m_s=u,operating_conditions=system.operating_conditions,
+            particle, u_m_s=u, operating_conditions=system.operating_conditions,
             dt_s=dt_s, use_corrected_velocity=use_corrected,
         )
  
@@ -88,6 +107,7 @@ def step_particle(particle: Particle, system: DigestionSystem, t: float, dt_s: f
                 transition_to_reactor(particle, TUBULAR_CHAIN_NAMES[idx + 1])
             else:
                 mark_particle_exit(particle, t)
+ 
  
  
 def run_population_simulation(system: DigestionSystem, meal: MealParameter, dt_s: float, max_t_s: float,
@@ -105,7 +125,7 @@ def run_population_simulation(system: DigestionSystem, meal: MealParameter, dt_s
     use_corrected_by_type = compute_settling_velocity_choices(meal.particles, system.operating_conditions)
     particles = generate_particles_from_meal(meal, entry_time_s=entry_time_s, starting_reactor=starting_reactor)
     reactors_by_name = {r.name: r for r in system.reactors}
-
+ 
     volume_history: Dict[str, List[float]] = {"t": []}
     if record_volume_history:
         for r in system.reactors:
@@ -119,23 +139,33 @@ def run_population_simulation(system: DigestionSystem, meal: MealParameter, dt_s
  
     if record_volume_history:
         _record_volumes(entry_time_s)
-
+ 
     t = entry_time_s
+    system_has_flowed = False
     while t < max_t_s and any(p.active for p in particles):
         t += dt_s
-
+ 
+        # Mise à jour des volumes de R1/R2 (bilan de matière), et
+        # remplissage en cascade de R3->R4->R5 (poussé par R1/R2), UNE
+        # FOIS par pas de temps (pas par particule) — cf.
+        # simulation/volume_dynamics.py.
         update_reactor_volumes(system, t, dt_s)
-
         if inject_meal_volume:
             inject_meal_into_stomach(system, meal, t, dt_s, meal_start_time_s=entry_time_s)
-
         update_tubular_reactor_volumes(system, t, dt_s)
-
-
+ 
         for particle in particles:
             step_particle(particle, system, t, dt_s, use_corrected_by_type, reactors_by_name)
-
+ 
         if record_volume_history:
             _record_volumes(t)
 
+        
+        # Arrêt anticipé si le système est devenu stagnant
+        if _system_is_flowing(system, t):
+            system_has_flowed = True
+        elif system_has_flowed:
+            break
+        
+ 
     return SimulationResult(particles=particles, volume_history=volume_history)

@@ -18,12 +18,11 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
- 
+
 from src.models.system import DigestionSystem
 from src.models.particle_type import ParticleType
 from src.dataImport.excel_loader import ExcelLoader
 from src.export.export_excel import export_to_excel
- 
 from src.simulation.simulation import run_population_simulation
 from src.simulation.rtd import (
     residence_time_summary,
@@ -137,7 +136,9 @@ class MainWindow(QMainWindow):
 
         meal = simulation_init["meal"]
         simulation_param = simulation_init["simulation_param"]
+        print()
         particle_types = simulation_init["particle_types"]
+        system = simulation_init["system"]
 
         # Paramètres de simulation 
         sim_group = QGroupBox("Paramètres de simulation")
@@ -145,8 +146,10 @@ class MainWindow(QMainWindow):
  
         self.duration_spin = QDoubleSpinBox()
         self.duration_spin.setRange(1.0, 1_000_000.0)
-        self.duration_spin.setValue(simulation_param.simulation_duration)
-        self.duration_spin.setSuffix(" s")
+        self.duration_spin.blockSignals(True)
+        self.duration_spin.setValue(int(simulation_param.simulation_duration / 60))
+        self.duration_spin.blockSignals(False)        
+        self.duration_spin.setSuffix(" min")
         sim_form.addRow("Durée de simulation :", self.duration_spin)
  
         self.dt_spin = QDoubleSpinBox()
@@ -157,13 +160,13 @@ class MainWindow(QMainWindow):
  
         self.stomach_volume_spin = QDoubleSpinBox()
         self.stomach_volume_spin.setRange(0.0, 700.0)
-        self.stomach_volume_spin.setValue(500.0)
+        self.stomach_volume_spin.setValue(system.r1_stomach.volume)
         self.stomach_volume_spin.setSuffix(" mL")
         sim_form.addRow("Volume initial R1 (Estomac) :", self.stomach_volume_spin)
  
         self.preduodenum_volume_spin = QDoubleSpinBox()
         self.preduodenum_volume_spin.setRange(0.0, 300.0)
-        self.preduodenum_volume_spin.setValue(40.0)
+        self.preduodenum_volume_spin.setValue(system.r2_preduodenum.volume)
         self.preduodenum_volume_spin.setSuffix(" mL")
         sim_form.addRow("Volume initial R2 (Préduodénum) :", self.preduodenum_volume_spin)
  
@@ -180,9 +183,9 @@ class MainWindow(QMainWindow):
         meal_form.addRow("Débit d'entrée du repas :", self.meal_flow_spin)
  
         self.meal_period_spin = QDoubleSpinBox()
-        self.meal_period_spin.setRange(0.0, 3600.0)
-        self.meal_period_spin.setValue(meal.meal_entry_period)
-        self.meal_period_spin.setSuffix(" s")
+        self.meal_period_spin.setRange(0.0, 60.0)
+        self.meal_period_spin.setValue(meal.meal_entry_period / 60.0)  # converti en minutes pour l'affichage
+        self.meal_period_spin.setSuffix(" min")
         meal_form.addRow("Période d'entrée du repas :", self.meal_period_spin)
  
         self.viscosity_spin = QDoubleSpinBox()
@@ -232,7 +235,8 @@ class MainWindow(QMainWindow):
  
         layout.addStretch()
         return panel
- 
+    
+    
     # Panneau de résultats
     def _build_results_panel(self) -> QWidget:
         panel = QWidget()
@@ -293,7 +297,7 @@ class MainWindow(QMainWindow):
  
         try:
             simulation_config = {
-                "duree_simulation_s": self.duration_spin.value(),
+                "duree_simulation": self.duration_spin.value(),
                 "pas_de_temps_s": self.dt_spin.value(),
                 "volume_initial_R1_mL": self.stomach_volume_spin.value(),
                 "volume_initial_R2_mL": self.preduodenum_volume_spin.value(),
@@ -342,7 +346,7 @@ class MainWindow(QMainWindow):
             result = run_population_simulation(
                             system=system, meal=meal,
                             dt_s=self.dt_spin.value(),
-                            max_t_s=self.duration_spin.value(),
+                            max_t_s=self.duration_spin.value() * 60,  # converti en secondes
                             inject_meal_volume=False,  # volume initial de R1 inclut déjà le repas
                         )
             self._last_particles = result.particles
@@ -434,12 +438,13 @@ def simulation_initialization():
 
     loader = ExcelLoader()
     config = loader.load_configuration(excel_path)
-        
-    # Système et repas de test 
-    system = DigestionSystem(config, initial_stomach_volume_ml=500.0, initial_preduodenum_volume_ml=40.0)
+
     particle_types = loader._load_particles(excel_path,"Particules")
     meal =  config.meal_parameter
-          
+
+    # Système
+    system = DigestionSystem(config, initial_stomach_volume_ml=500, initial_preduodenum_volume_ml=40.0)
+    
     # Simulation
     simulation_param = config.simulation_parameter
 

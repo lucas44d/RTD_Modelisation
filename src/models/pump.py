@@ -257,6 +257,7 @@ def build_digestive_solution_pumps() -> dict:
     On a donc [temps_debut, temps_fin, debit_mL_min, volume_final_mL] pour chaque segment de débit constant.
     """
     tables = {
+        "A1.2": [("00:00:00", "00:10:00", 50, 500)], #modifier pour que ca corresponde au débit/période entrée du repas
         "A3": [("00:00:00", "00:04:00", 10.00, 40)],
         "A4": [
             ("00:03:00", "00:04:00", 5.00, 5),
@@ -293,12 +294,12 @@ def build_transfer_pumps() -> dict:
             ("00:03:00", "00:09:00", 4, 24),
             ("00:09:00", "01:14:00", 7, 455),
             ("01:14:00", "01:44:00", 4, 120),
-            ("01:44:00", "02:04:00", 3, 60),
+            ("01:44:00", "03:34:00", 3, 60),
         ],
         "T2": [
             ("00:18:00", "00:43:00", 9, 225),
             ("00:43:00", "01:13:00", 7, 210),
-            ("01:13:00", "04:30:00", 5, 985),
+            ("01:13:00", "05:00:00", 5, 985),
         ],
     }
     return {
