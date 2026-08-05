@@ -10,7 +10,7 @@ from models.meal_parameter import MealParameter
 from simulation.topology import cstr_outflow_rate
 
 # Pompes de dosage qui alimentent directement R1
-R1_INFLOW_PUMPS = ["A3", "A4", "B1", "B3"]
+R1_INFLOW_PUMPS = [ "A3", "A4", "B1", "B3"]
 
 # Pompes de dosage qui alimentent directement R2 
 R2_INFLOW_PUMPS = ["C1", "C2", "C3"]

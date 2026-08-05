@@ -19,11 +19,11 @@ from src.models.reactor import TubularReactor
 from src.models.system import DigestionSystem
 
 DEFAULT_ADDITIONAL_INFLOWS = {
+    #"R1 - Estomac": ["A1.2"],
     "R2 - Préduodénum": ["C1", "C2", "C3"],
-    "R3 - Duodénum": ["T.R3"],
-    "R4 - Jéjunum": ["E1", "T.R3"],
-    "R5 - Iléon": ["E1", "T.R3"],
-    "R5 - Stomie": ["E1", "T.R3"],
+    "R4 - Jéjunum": ["E1"],   
+    "R5 - Iléon": ["E1"],
+    "R5 - Stomie": ["E1"],
 }
 
 def reactor_inflow_rate(system: DigestionSystem, reactor_name: str, t_s: float, extra_inflows: Optional[List[str]] = None, use_default_additional_inflows: bool = True) -> float:
@@ -81,7 +81,7 @@ def cstr_outflow_rate(system: DigestionSystem, reactor_name: str, t_s: float) ->
         reactor = system.r2_preduodenum
     else:
         return 0.0
- 
-    if reactor.volume <= reactor.min_agitation_volume_ml:
+
+    if (reactor.volume <= 0.0) and (reactor.name =="R1 - Estomac"):
         return 0.0
     return nominal
