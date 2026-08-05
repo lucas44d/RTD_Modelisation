@@ -36,7 +36,6 @@ def update_reactor_volumes(system: DigestionSystem, t_s: float, dt_s: float) -> 
     r2_out_ml_min = cstr_outflow_rate(system, "R2 - Préduodénum", t_s)
     net_r2_ml_min = r2_in_ml_min - r2_out_ml_min
     system.r2_preduodenum.add_volume(net_r2_ml_min / 60.0 * dt_s)
-    print("R2 outflow rate at t_s =", t_s, "is", r2_out_ml_min, "mL/min")
 
 
 def inject_meal_into_stomach(system: DigestionSystem, meal: MealParameter, t_s: float, dt_s: float, meal_start_time_s: float = 0.0) -> None:

@@ -297,7 +297,7 @@ class MainWindow(QMainWindow):
  
         try:
             simulation_config = {
-                "duree_simulation_s": self.duration_spin.value(),
+                "duree_simulation": self.duration_spin.value(),
                 "pas_de_temps_s": self.dt_spin.value(),
                 "volume_initial_R1_mL": self.stomach_volume_spin.value(),
                 "volume_initial_R2_mL": self.preduodenum_volume_spin.value(),

@@ -151,8 +151,7 @@ def plot_cumulative_exit_counts_by_group(grouped_data: Dict[str, tuple]) -> Figu
 
 def plot_active_particles_by_reactor(counts: Dict[str, int]) -> Figure:
     """
-    Histogramme du nombre de particules encore actives (non sorties du
-    système) par réacteur 
+    Histogramme du nombre de particules encore actives (non sorties du système) par réacteur 
     Montre où les particules restent bloquées à la fin de la simulation.
     """
     fig = Figure(figsize=(6, 4))
