@@ -25,7 +25,7 @@ def plot_residence_time_distribution(bin_centers: List[float], e_values: List[fl
         width = (bin_centers[1] - bin_centers[0]) if len(bin_centers) > 1 else 1.0
         ax.bar(bin_centers, e_values, width=width, alpha=0.7, label="E(t) simulé", color="#3b82f6", edgecolor="white")
 
-    ax.set_xlabel("Temps (s)")
+    ax.set_xlabel("Temps (min)")
     ax.set_ylabel("E(t)")
     ax.set_title("Distribution des temps de résidence")
     if bin_centers:
@@ -44,7 +44,7 @@ def plot_cumulative_distribution(t_values: List[float], f_values: List[float]) -
         ax.plot(t_values, f_values, color="#10b981", linewidth=2)
         ax.fill_between(t_values, f_values, alpha=0.1, color="#10b981")
 
-    ax.set_xlabel("Temps (s)")
+    ax.set_xlabel("Temps (min)")
     ax.set_ylabel("F(t)")
     ax.set_title("Fonction cumulée des temps de résidence")
     ax.set_ylim(0, 1.05)
@@ -65,7 +65,7 @@ def plot_exit_count_histogram(bin_starts: List[float], counts: List[int]) -> Fig
         ax.bar(bin_starts, counts, width=width, align="edge", alpha=0.8,
                color="#f59e0b", edgecolor="white")
  
-    ax.set_xlabel("Temps (s)")
+    ax.set_xlabel("Temps (min)")
     ax.set_ylabel("Nombre de particules sorties")
     ax.set_title("Particules sorties par intervalle de temps")
     ax.grid(True, alpha=0.3)
@@ -85,7 +85,7 @@ def plot_cumulative_exit_counts(t_values: List[float], counts: List[int]) -> Fig
         ax.step(t_values, counts, where="post", color="#8b5cf6", linewidth=2)
         ax.fill_between(t_values, counts, step="post", alpha=0.1, color="#8b5cf6")
  
-    ax.set_xlabel("Temps (s)")
+    ax.set_xlabel("Temps (min)")
     ax.set_ylabel("Nombre cumulé de particules sorties")
     ax.set_title("Sorties cumulées du système")
     ax.grid(True, alpha=0.3)
@@ -101,20 +101,19 @@ def plot_volume_history(volume_history: Dict[str, List[float]]) -> Figure:
             simulation/volume_dynamics.py::update_reactor_volumes).
     R3/R4/R5 : volume de remplissage (démarre à 0, tube vide, se remplit
             jusqu'à la capacité maximale au fur et à mesure que le liquide
-            est poussé depuis l'amont, cf.
-            update_tubular_reactor_volumes).
+            est poussé depuis l'amont)
     """
     fig = Figure(figsize=(7, 5))
     ax = fig.add_subplot(111)
  
-    t_values = volume_history.get("t", [])
+    t_values = [t / 60 for t in volume_history.get("t", [])]
     reactor_names = [k for k in volume_history.keys() if k != "t"]
  
     for i, name in enumerate(reactor_names):
         color = _GROUP_COLORS[i % len(_GROUP_COLORS)]
         ax.plot(t_values, volume_history[name], color=color, linewidth=2, label=name)
  
-    ax.set_xlabel("Temps (s)")
+    ax.set_xlabel("Temps (min)")
     ax.set_ylabel("Volume (mL)")
     ax.set_title("Suivi des volumes du système")
     if reactor_names:
@@ -140,7 +139,7 @@ def plot_cumulative_exit_counts_by_group(grouped_data: Dict[str, tuple]) -> Figu
         if t_values:
             ax.step(t_values, counts, where="post", color=color, linewidth=2, label=label)
  
-    ax.set_xlabel("Temps (s)")
+    ax.set_xlabel("Temps (min)")
     ax.set_ylabel("Nombre cumulé de particules sorties")
     ax.set_title("Comparaison des sorties cumulées par type de particule")
     if grouped_data:

@@ -20,7 +20,7 @@ from src.models.system import DigestionSystem
 
 DEFAULT_ADDITIONAL_INFLOWS = {
     #"R1 - Estomac": ["A1.2"],
-    "R2 - Préduodénum": ["C1", "C2", "C3"],
+    "R2 - Préduodénum": ["C1", "C2", "C3","AD1"],
     "R4 - Jéjunum": ["E1"],   
     "R5 - Iléon": ["E1"],
     "R5 - Stomie": ["E1"],
