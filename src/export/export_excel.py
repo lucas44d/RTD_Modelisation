@@ -1,3 +1,8 @@
+"""
+    Auteur : Lucas Durand
+    Fichier d'export des résultats de simulation vers un fichier Excel, avec mise en forme et graphiques.
+"""
+
 from __future__ import annotations
 from typing import List, Dict, Optional
 import pandas as pd
@@ -18,6 +23,7 @@ from simulation.rtd import (
 
 
 # Construction des DataFrames (une fonction par feuille)
+# Construction de la DataFrame des particules 
 def _particles_to_dataframe(particles: List[Particle]) -> pd.DataFrame:
     rows = []
     for i, p in enumerate(particles):
@@ -33,7 +39,7 @@ def _particles_to_dataframe(particles: List[Particle]) -> pd.DataFrame:
         })
     return pd.DataFrame(rows)
 
-
+# COnstruction de la DataFrame du résumé des résultats
 def _summary_to_dataframe(particles: List[Particle]) -> pd.DataFrame:
     summary = residence_time_summary(particles)
     rows = [
@@ -47,7 +53,7 @@ def _summary_to_dataframe(particles: List[Particle]) -> pd.DataFrame:
     ]
     return pd.DataFrame(rows)
 
-
+# Construction de la DataFrame du résumé par groupe (densité/taille)
 def _group_summary_to_dataframe(particles: List[Particle]) -> pd.DataFrame:
     grouped = mean_residence_time_by_group(particles)
     rows = []
@@ -62,6 +68,7 @@ def _group_summary_to_dataframe(particles: List[Particle]) -> pd.DataFrame:
         })
     return pd.DataFrame(rows)
 
+#
 def _cumulative_by_group_to_dataframe(particles: List[Particle]) -> pd.DataFrame:
     """
     Génère un DataFrame avec les courbes de sorties cumulées pour chaque groupe (densité/taille).
@@ -83,6 +90,7 @@ def _cumulative_by_group_to_dataframe(particles: List[Particle]) -> pd.DataFrame
     df = pd.DataFrame(dict([(k, pd.Series(v)) for k, v in data.items()]))
     return df
 
+# Construction des DataFrames pour les distributions et les histogrammes
 def _distribution_dataframes(particles: List[Particle], n_bins: int = 30) -> Dict[str, pd.DataFrame]:
     taus = collect_residence_times(particles)
 
@@ -101,11 +109,12 @@ def _distribution_dataframes(particles: List[Particle], n_bins: int = 30) -> Dic
         "Particules_actives": df_active,
     }
 
+#Construction de la DataFrame du suivi des volumes 
 def _volume_history_to_dataframe(volume_history: Dict[str, List[float]]) -> pd.DataFrame:
     return pd.DataFrame(volume_history)
 
 
-# Export principal
+# Export principal des Dataframes vers le fichier excel, avec mise en forme et graphiques
 def export_to_excel(filepath: str, particles: List[Particle],
                     volume_history: Optional[Dict[str, List[float]]] = None,
                     simulation_config: Optional[dict] = None,
@@ -150,7 +159,7 @@ def _style_sheet(ws) -> None:
         col_letter = get_column_letter(col_cells[0].column)
         ws.column_dimensions[col_letter].width = min(max_len + 2, 40)
 
-
+#Construction des graphiques en ligne Excel
 def _add_line_chart(ws, title: str, x_title: str, y_title: str,
                     n_rows: int, data_col: int, cat_col: int = 1,
                     anchor: str = "F2") -> None:
@@ -166,6 +175,7 @@ def _add_line_chart(ws, title: str, x_title: str, y_title: str,
     chart.set_categories(cats)
     ws.add_chart(chart, anchor)
 
+# Construction des graphiques multi-lignes Excel pour les sorties cumulées par groupe
 def _add_multi_line_chart(ws, title: str, x_title: str, y_title: str, anchor: str = "F2") -> None:
     if ws.max_row < 2 or ws.max_column < 2:
         return
@@ -200,6 +210,7 @@ def _add_multi_line_chart(ws, title: str, x_title: str, y_title: str, anchor: st
 
     ws.add_chart(chart, anchor)
 
+#Construction des graphiques multi-lignes Excel pour le suivi des volumes
 def _add_multi_line_chart_volume(ws, title: str, x_title: str, y_title: str, anchor: str = "F2") -> None:
     if ws.max_row < 2 or ws.max_column < 2:
         return
@@ -232,6 +243,7 @@ def _add_multi_line_chart_volume(ws, title: str, x_title: str, y_title: str, anc
 
     ws.add_chart(chart, anchor)
 
+#Construction des graphiques en barres Excel
 def _add_bar_chart(ws, title: str, x_title: str, y_title: str,
                    n_rows: int, data_col: int, cat_col: int = 1,
                    anchor: str = "F2") -> None:
@@ -247,7 +259,7 @@ def _add_bar_chart(ws, title: str, x_title: str, y_title: str,
     chart.set_categories(cats)
     ws.add_chart(chart, anchor)
 
-
+# Applique la mise en forme et les graphiques aux bonnes données et sur les bonnes feuilles du fichier Excel
 def _apply_formatting_and_charts(filepath: str, has_volumes: bool) -> None:
     wb = load_workbook(filepath)
 

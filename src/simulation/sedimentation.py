@@ -1,4 +1,5 @@
 """
+Auteur : Lucas Durand
 Implémente la vitesse de sédimentation d'une particule sphérique dans le fluide de digestion, 
 à partir de la force nette de flottaison calculée à l'increment 3.3 
 

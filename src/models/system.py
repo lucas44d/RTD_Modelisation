@@ -1,4 +1,5 @@
 """
+Auteur : Lucas Durand
 Assemble le système complet IViDiS : instancie tous les bioréacteurs (R1 à R5) et les pompes liées à l'agitation. 
 Sert de point d'entrée unique pour consulter les volumes et l'état d'agitation de l'ensemble du système à un instant donné.
 """

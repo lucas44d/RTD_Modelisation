@@ -1,4 +1,5 @@
 """
+Auteur : Lucas Durand
 Pompes liées aux relations d'agitation :
     - Émulsion de R1 (EmuR1 : émulsion de l'estomac)
     - Pompe va-et-vient de R3 / T3

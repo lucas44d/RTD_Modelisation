@@ -1,4 +1,5 @@
 """
+Auteur : Lucas Durand
 Suivi dynamique du volume des réacteurs agités R1 (Estomac) et R2 (Préduodénum) au cours du temps, par bilan de matière 
 (débit entrant - débit sortant), 
 """

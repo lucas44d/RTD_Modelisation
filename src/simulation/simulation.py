@@ -1,3 +1,8 @@
+"""
+    Auteur : Lucas Durand
+    Logique de simulation complète du système IViDiS, avec suivi des volumes et des particules.
+    Implémente la simulation de la population de particules d'un repas à travers le système
+"""
 from __future__ import annotations
 from typing import List, Dict
 from dataclasses import dataclass, field

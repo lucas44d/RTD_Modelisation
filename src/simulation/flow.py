@@ -1,4 +1,5 @@
 """
+Auteur : Lucas Durand
 Implémente le calcul de la vitesse du fluide dans les différentes parties du
 système IViDiS :
 

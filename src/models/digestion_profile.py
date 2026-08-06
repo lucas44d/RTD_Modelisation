@@ -1,3 +1,8 @@
+"""
+    Auteur : Lucas Durand
+    Définition de la classe DigestionProfile, qui représente le profil de digestion du système IViDiS.
+    Implémentée grâce au fichier Excel de configuration.
+"""
 from dataclasses import dataclass
 
 """"Classe qui définit ce qu'est un profil de digestion"""

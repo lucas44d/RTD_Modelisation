@@ -1,5 +1,6 @@
 
 """
+Auteur : Lucas Durand
 Interface graphique PySide6 :
     - Configurer les paramètres de simulation (durée, pas de temps, volumes initiaux) et le repas (types de particules)
     - Lancer la simulation

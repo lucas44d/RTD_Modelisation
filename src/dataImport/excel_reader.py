@@ -1,3 +1,7 @@
+"""
+    Auteur : Lucas Durand
+    Fichier permettant de lire les fichiers excels.
+"""
 from fileinput import filename
 
 import pandas as pd
