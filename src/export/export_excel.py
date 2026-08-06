@@ -20,6 +20,7 @@ from simulation.rtd import (
     mean_residence_time_by_group,
     count_active_particles_by_reactor,
 )
+from simulation.rtd import group_particles_by_type, collect_residence_times, compute_cumulative_exit_counts_excel
 
 
 # Construction des DataFrames (une fonction par feuille)
@@ -73,7 +74,6 @@ def _cumulative_by_group_to_dataframe(particles: List[Particle]) -> pd.DataFrame
     """
     Génère un DataFrame avec les courbes de sorties cumulées pour chaque groupe (densité/taille).
     """
-    from simulation.rtd import group_particles_by_type, collect_residence_times, compute_cumulative_exit_counts_excel
 
     groups = group_particles_by_type(particles)
     data = {}

@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QTabWidget, QGroupBox, QMessageBox, QSplitter, QFileDialog,
 )
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 
 from src.models.system import DigestionSystem
@@ -461,7 +462,12 @@ def simulation_initialization():
     }
  
 def main():
+    current_file = Path(__file__).resolve()
+    base_dir = next(p for p in current_file.parents if (p / "resources").is_dir())
+    
+    img_path = base_dir / "resources" / "logo.png"
     app = QApplication.instance() or QApplication(sys.argv)
+    app.setWindowIcon(QIcon(str(img_path)))
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
