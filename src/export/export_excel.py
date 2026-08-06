@@ -200,6 +200,38 @@ def _add_multi_line_chart(ws, title: str, x_title: str, y_title: str, anchor: st
 
     ws.add_chart(chart, anchor)
 
+def _add_multi_line_chart_volume(ws, title: str, x_title: str, y_title: str, anchor: str = "F2") -> None:
+    if ws.max_row < 2 or ws.max_column < 2:
+        return
+
+    chart = LineChart()
+    chart.title = title
+    chart.x_axis.title = x_title
+    chart.y_axis.title = y_title
+    chart.style = 13  # Style propre OpenPyXL
+
+    n_rows = ws.max_row
+    n_cols = ws.max_column
+
+    # Col 1: volume R1, Col 2: volume R2, etc. 
+    for col in range(1, n_cols + 1):
+        if col + 1 > n_cols:
+            break
+            
+        time_col = col
+        data_col = col + 1
+
+        # Données Y (Nombre cumulé)
+        data = Reference(ws, min_col=data_col, max_col=data_col, min_row=1, max_row=n_rows)
+        # Axe X (Temps min)
+        cats = Reference(ws, min_col=time_col, min_row=2, max_row=n_rows)
+
+        chart.add_data(data, titles_from_data=True)
+        # Note : On applique les catégories sur la dernière série ajoutée
+        chart.series[-1].graphicalProperties.line.width = 25000  # Épaisseur de ligne
+
+    ws.add_chart(chart, anchor)
+
 def _add_bar_chart(ws, title: str, x_title: str, y_title: str,
                    n_rows: int, data_col: int, cat_col: int = 1,
                    anchor: str = "F2") -> None:
@@ -256,16 +288,12 @@ def _apply_formatting_and_charts(filepath: str, has_volumes: bool) -> None:
     if has_volumes and "Volumes" in wb.sheetnames:
         ws = wb["Volumes"]
         if ws.max_row >= 2:
-            chart = LineChart()
-            chart.title = "Suivi des volumes du système"
-            chart.x_axis.title = "Temps (min)"
-            chart.y_axis.title = "Volume (mL)"
-            n_rows = ws.max_row
-            n_cols = ws.max_column
-            data = Reference(ws, min_col=2, max_col=n_cols, min_row=1, max_row=n_rows)
-            cats = Reference(ws, min_col=1, min_row=2, max_row=n_rows)
-            chart.add_data(data, titles_from_data=True)
-            chart.set_categories(cats)
-            ws.add_chart(chart, "H2")
-
+            _add_multi_line_chart_volume(
+                ws,
+                title="Suivi des volumes du système",
+                x_title="Temps (min)",
+                y_title="Volume (mL)",
+                anchor="H2"
+            )
+            
     wb.save(filepath)

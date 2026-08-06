@@ -349,10 +349,12 @@ class MainWindow(QMainWindow):
                             max_t_s=self.duration_spin.value() * 60,  # converti en secondes
                             inject_meal_volume=False,  # volume initial de R1 inclut déjà le repas
                         )
+            
             self._last_particles = result.particles
             self._display_results(result.particles, system, result.volume_history)
             self.status_label.setText("Simulation terminée.")
- 
+            self._last_volume_history = result.volume_history
+            
         except Exception as exc:  # affichage d'erreur plutôt qu'un crash
             QMessageBox.critical(self, "Erreur pendant la simulation", str(exc))
             self.status_label.setText("Erreur pendant la simulation (voir message).")
