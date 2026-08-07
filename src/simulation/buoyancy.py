@@ -1,4 +1,5 @@
 """
+Auteur : Lucas Durand
 Implémente le calcul de la poussée d'Archimède agissant sur une particule immergée dans le fluide de digestion
 
 Rappel physique (particule sphérique de rayon r) :

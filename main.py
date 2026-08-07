@@ -1,4 +1,5 @@
 """
+Auteur : Lucas Durand
 Point d'entrée du projet IViDiS (usage en ligne de commande, sans interface graphique — cf. gui_main.py pour la version PySide6)
  
 toute la logique vit dans

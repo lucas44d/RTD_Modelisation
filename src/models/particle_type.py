@@ -1,5 +1,8 @@
+"""
+    Auteur : Lucas Durand
+    Définition de la classe ParticleType, qui représente un type de particule dans le système digestif. Implémentée grâce au fichier Excel de configuration.
+"""
 from dataclasses import dataclass
-
 
 """Classe définissant les particules"""
 @dataclass

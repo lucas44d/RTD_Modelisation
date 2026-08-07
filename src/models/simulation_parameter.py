@@ -1,3 +1,7 @@
+"""
+    Auteur : Lucas Durand
+    Définition des paramètres de simulation qui sont importés via le fichier Excel de configuration.
+"""
 from dataclasses import dataclass
 
 """"Classe qui définit ce que sont les paramètres de simulation"""

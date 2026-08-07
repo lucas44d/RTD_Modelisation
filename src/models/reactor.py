@@ -1,4 +1,5 @@
 """
+Auteur : Lucas Durand
 On distingue deux familles de réacteurs, conformément aux hypothèses :
 
 - Réacteurs agités (CSTR) à volume variable: R1 (Estomac) et R2 (Préduodénum).

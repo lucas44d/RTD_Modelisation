@@ -1,4 +1,5 @@
 """
+Auteur : Lucas Durand
 Pompes liées aux relations d'agitation :
     - Émulsion de R1 (EmuR1 : émulsion de l'estomac)
     - Pompe va-et-vient de R3 / T3
@@ -295,7 +296,7 @@ def build_transfer_pumps() -> dict:
             ("00:03:00", "00:09:00", 4, 24),
             ("00:09:00", "01:14:00", 7, 455),
             ("01:14:00", "01:44:00", 4, 120),
-            ("01:44:00", "03:34:00", 3, 60),
+            ("01:44:00", "02:04:00", 3, 60),
         ],
         "T2": [
             ("00:18:00", "00:43:00", 9, 225),

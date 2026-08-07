@@ -1,3 +1,8 @@
+"""
+    Auteur : Lucas Durand
+    Définition des conditions de fonctionnement du système IViDiS.
+    Ces conditons sont définies une seule fois et ne sont plus modifiées par la suite.
+"""
 from dataclasses import dataclass
 
 @dataclass

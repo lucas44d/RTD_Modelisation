@@ -1,4 +1,5 @@
 """
+Auteur : Lucas Durand
 Câblage de la topologie du système (quelle pompe alimente quel réacteur)
 
 Topologie confirmée par le PID :

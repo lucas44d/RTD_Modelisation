@@ -1,4 +1,5 @@
 """
+Auteur : Lucas Durand
 Implémente :
     - La vitesse de sédimentation de Stokes
     - Le déplacement des particules par advection (direction x, réacteurs tubulaires) et par sédimentation/flottation (direction z)

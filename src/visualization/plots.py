@@ -1,4 +1,5 @@
 """
+    Auteur : Lucas Durand
     Fonctions de génération de graphiques matplotlib pour les résultats de simulation RTD
 
     Retourne des objets figure matplotlib, destinés à être intégrés dans l'interface PySide6

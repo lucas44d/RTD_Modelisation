@@ -1,4 +1,5 @@
 """
+Auteur : Lucas Durand
 Lance l'interface graphique PySide6
 """
  

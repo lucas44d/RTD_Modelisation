@@ -1,3 +1,7 @@
+"""
+Auteur : Lucas Durand
+Fichier permettant de charger les données du fichier excel lu dans les classes respectives.
+"""
 import pandas as pd
 
 from src.models.digestion_profile import DigestionProfile

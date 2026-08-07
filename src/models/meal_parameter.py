@@ -1,3 +1,7 @@
+"""
+    Auteur : Lucas Durand
+    Définition des paramètres de repas qui sont importés via le fichier Excel de configuration.
+"""
 from dataclasses import dataclass,field
 from .particle_type import ParticleType
 

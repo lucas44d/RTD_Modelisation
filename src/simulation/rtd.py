@@ -1,4 +1,5 @@
 """
+    Auteur : Lucas Durand
     Ce fichier implémente les calculs pour la distribution des temps de résidence, la fonction cumulée, et la variance
 
     Il permet d'aider à l'analyse des résultats expérimentaux grâce aux formules de la section 5 du cahier des charges
