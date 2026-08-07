@@ -437,13 +437,15 @@ def simulation_initialization():
     # Importation du tableau excel
     current_file = Path(__file__).resolve()
     base_dir = next(p for p in current_file.parents if (p / "resources").is_dir())
-
     excel_path = base_dir / "resources" / "data_import.xlsx"
 
     loader = ExcelLoader()
     config = loader.load_configuration(excel_path)
 
+    # Types de particules du repas avec leurs nombres respectifs
     particle_types = loader._load_particles(excel_path,"Particules")
+
+    # Repas
     meal =  config.meal_parameter
 
     # Système
@@ -462,12 +464,16 @@ def simulation_initialization():
     }
  
 def main():
+    # Récupération de l'icône de l'application
     current_file = Path(__file__).resolve()
     base_dir = next(p for p in current_file.parents if (p / "resources").is_dir())
-    
     img_path = base_dir / "resources" / "logo.png"
+
+    # Définition de l'application PySide6 et affichage de la fenêtre principale
     app = QApplication.instance() or QApplication(sys.argv)
     app.setWindowIcon(QIcon(str(img_path)))
+
+    # Création et affichage de la fenêtre principale
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
