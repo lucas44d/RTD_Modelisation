@@ -21,7 +21,10 @@ class ExcelLoader:
         df = pd.read_excel(filename, sheet)
 
         row = df.iloc[0]
-        
+
+        transition_flow_T1 = self._load_transition_flows(filename, sheet="Pompe Transition T1")
+        transition_flow_T2 = self._load_transition_flows(filename, sheet="Pompe Transition T2")
+
         return SimulationParameter(
             config_name = row["Nom de la config"],
             enzyme_volume = row["Volume enzyme (ml)"],
@@ -29,7 +32,8 @@ class ExcelLoader:
             enzyme_entry_period=row["Période d'entrée enzyme"],                
             simulation_duration=row["Durée totale de simulation (min)"] *60,  # converti en secondes
             time_step=row["Pas de temps"],
-            transition_flow=row["Débit de transition"]
+            transition_flow_T1=transition_flow_T1,
+            transition_flow_T2=transition_flow_T2
         )
             
  
@@ -40,11 +44,15 @@ class ExcelLoader:
                     
         row = df.iloc[0]
 
+        reciprocating_pump = self._load_reciprocating_pump_parameters(filename, sheet="Va-et-vient tubulaire")
+        mixing_speed_R1 = self._load_mixing_R1_parameters(filename, sheet="Brassage R1")
+
         return DigestionProfile(
             profile_name = row["Nom du profil"],
-            reciprocating_flow = row ["Débit du va et vient"], 
-            reciprocating_period = row ["Période du va et vient"], 
-            mixing_speed_R1 = row ["Vitesse de brassage dans R1"],
+            reciprocating_flow = reciprocating_pump["flow_rate"],
+            reciprocating_action_duration = reciprocating_pump["action_duration"],
+            reciprocating_wait_duration = reciprocating_pump["wait_duration"],
+            mixing_speed_R1 = mixing_speed_R1,
             mixing_speed_R2 = row ["Vitesse de brassage dans R2"],
             emulsion_mixing_speed = row ["Vitesse de brassage de l'émulsion"],
             emulsion_mixing_period = row ["Période de brassage de l'émulsion"],
@@ -88,7 +96,57 @@ class ExcelLoader:
             )
         #Retour de la liste des particules
         return particles
-    
+
+    def _load_transition_flows(self, filename: str, sheet: str) -> dict:
+        df = pd.read_excel(filename, sheet_name=sheet)        
+        t_periods = []
+        
+        # Parcours de la DataFrame row par row
+        for _, row in df.iterrows():
+            # Conversion du temps au format HH:MM:SS
+            start_time = row["Début période"]
+            end_time = row["Fin période"]
+            
+            # Si pandas a interprété le temps comme datetime.time ou pd.Timestamp/timedelta :
+            if hasattr(start_time, "strftime"):
+                start_str = start_time.strftime("%H:%M:%S")
+            else:
+                start_str = str(start_time)
+                
+            if hasattr(end_time, "strftime"):
+                end_str = end_time.strftime("%H:%M:%S")
+            else:
+                end_str = str(end_time)
+            
+            # Récupération et conversion du débit et du volume (en int ou float selon besoin)
+            debit = int(row["Débit (ml/min)"])
+            volume = int(row["volume total"])
+            
+            # Ajout du tuple à la liste
+            t_periods.append((start_str, end_str, debit, volume))
+        #Structuration dans le dictionnaire final
+        if sheet == "Pompe Transition T1":
+            return {"T1": t_periods}
+        else :
+            return {"T2": t_periods}
+
+    def _load_reciprocating_pump_parameters(self, filename: str, sheet: str) -> dict:
+        df = pd.read_excel(filename, sheet_name=sheet)
+        row = df.iloc[0]
+        return {
+            "flow_rate": row["Débit (ml/min)"],
+            "action_duration": row["Durée active"],
+            "wait_duration": row["Durée pause"]
+        }
+
+    def _load_mixing_R1_parameters(self, filename: str, sheet: str) -> dict:
+        df = pd.read_excel(filename, sheet_name=sheet)
+        row = df.iloc[0]
+        return {
+            "slope": row["Coefficient de pente (a)"],
+            "intercept": row["Ordonnée à l'origine (b)"]
+        }
+
     def load_configuration(self, filename: str) -> ExperimentConfiguration :
         digestion = self.load_digestion_profile(filename,"Profil digestion")
         simulation = self.load_simulation_parameter(filename, "Parametres simulation")

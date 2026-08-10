@@ -151,7 +151,7 @@ class StomachReactor(StirredReactor):
         (la pompe seringue et l'agitateur à pale s'arrêtent eux sous 100 mL, seuil distinct de celui du barreau magnétique)
 
     Agitation :
-        - Barreau magnétique : Vitesse(rpm) = 0.5 * Volume + 200, arrêté < 50 mL
+        - Barreau magnétique : Vitesse(rpm) = a * Volume + b, arrêté < 50 mL où a et b sont des coefs récupérés dans le fichier Excel d'import
         - Agitateur à pale : 60 rpm, oscille jusqu'à 15° de la chicane avant de s'inverser, arrêté < 100 mL
     """
 
@@ -162,20 +162,23 @@ class StomachReactor(StirredReactor):
     PADDLE_RPM = 60.0
     PADDLE_ANGLE_DEG = 15.0
 
-    def __init__(self, initial_volume_ml: float = 0.0):
+    def __init__(self, config : ExperimentConfiguration, initial_volume_ml: float = 0.0):
+        self.config = config
         super().__init__(
             name="R1 - Estomac",
             initial_volume_ml=initial_volume_ml,
             max_volume_ml=self.MAX_VOLUME_ML,
             min_agitation_volume_ml=self.MIN_STIRRER_VOLUME_ML,
         )
+        self.stiring_slope = config.digestion_profile.mixing_speed_R1["slope"]
+        self.stiring_intercept = config.digestion_profile.mixing_speed_R1["intercept"]
 
     """Relation d'agitation du barreau magnétique de R1"""
     def magnetic_stirrer_status(self) -> StirrerStatus:
         """Si le volume < 50ml, l'agitation est arretée : on retourne état stopped"""
         if self._volume_ml < self.MIN_STIRRER_VOLUME_ML:
             return StirrerStatus(0.0, AgitationState.STOPPED)
-        rpm = 0.5 * self._volume_ml + 200.0
+        rpm = self.stiring_slope * self._volume_ml + self.stiring_intercept
         return StirrerStatus(rpm, AgitationState.RUNNING)
     
     """Relation d'agitation de l'agitateur à pale de R1"""

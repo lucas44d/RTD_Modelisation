@@ -13,4 +13,5 @@ class SimulationParameter:
     enzyme_entry_period: float
     simulation_duration: float
     time_step: float
-    transition_flow: float
+    transition_flow_T1: float
+    transition_flow_T2: float

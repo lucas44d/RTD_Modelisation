@@ -24,7 +24,7 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from src.models.system import DigestionSystem
 from src.models.particle_type import ParticleType
 from src.dataImport.excel_loader import ExcelLoader
-from src.export.export_excel import export_to_excel
+from src.dataExport.export_excel import export_to_excel
 from src.simulation.simulation import run_population_simulation
 from src.simulation.rtd import (
     residence_time_summary,

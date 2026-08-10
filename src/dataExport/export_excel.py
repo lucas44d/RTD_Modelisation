@@ -10,6 +10,9 @@ from openpyxl import load_workbook
 from openpyxl.styles import Font, Alignment
 from openpyxl.utils import get_column_letter
 from openpyxl.chart import LineChart, BarChart, Reference
+from openpyxl.chart.layout import Layout, ManualLayout
+from openpyxl.drawing.text import Paragraph, ParagraphProperties, CharacterProperties
+from openpyxl.chart.text import RichText
 
 from simulation.particle_motion import Particle
 from simulation.rtd import (
@@ -180,22 +183,58 @@ def _create_base_chart(chart_cls, title: str, x_title: str, y_title: str, style:
     chart.title = title
     chart.x_axis.title = x_title
     chart.y_axis.title = y_title
+
+    chart.x_axis.title = x_title
+    chart.y_axis.title = y_title
+
+    chart.x_axis.delete = False
+    chart.y_axis.delete = False
+
     chart.x_axis.tickLblPos = "low"
+
+    chart.width = 22
+    chart.height = 11
+
+    _shrink_axis_labels(chart.x_axis, size=800)
+    _shrink_axis_labels(chart.y_axis, size=800)
+
+    _position_axis_title(chart.x_axis, x=0.35, y=0.92)
+    _position_axis_title(chart.y_axis, x=0.02, y=0.35)
+
     if style is not None:
         chart.style = style
     return chart
+
+def _position_axis_title(axis, x, y):
+    """Positionne manuellement le titre d'un axe (coordonnées relatives 0-1)."""
+    if axis.title is None:
+        return
+    axis.title.layout = Layout(
+        manualLayout=ManualLayout(
+            xMode="edge",
+            yMode="edge",
+            x=x,
+            y=y,
+        )
+    )
+
+def _shrink_axis_labels(axis, size=800):
+    """Réduit la taille de police des labels d'un axe (size en centièmes de point, 800 = 8pt)."""
+    axis.txPr = RichText(
+        bodyPr=None,
+        p=[Paragraph(pPr=ParagraphProperties(defRPr=CharacterProperties(sz=size)))]
+    )
 
 def _style_series_line(series, color_hex: str, width: int = 25000) -> None:
     """Applique une couleur et une épaisseur à une série de lignes."""
     series.graphicalProperties.line.solidFill = color_hex
     series.graphicalProperties.line.width = width
 
-# --- Graphiques simples (Ligne ou Barre mono-série) ---
-
+# Graphiques simples (Ligne ou Barre mono-série)
 def add_single_series_chart(ws, chart_type: str, title: str, x_title: str, y_title: str,
                              n_rows: int, data_col: int, cat_col: int = 1,
                              anchor: str = "F2", style: int | None = 13) -> None:
-    """Génère un graphique à une seule série de données (Line ou Bar)."""
+    """Génère un graphique à une seule série de données (Line ou Bar)"""
     if n_rows < 2:
         return
 
@@ -220,7 +259,7 @@ def _add_bar_chart_active(ws, title: str, x_title: str, y_title: str, n_rows: in
     add_single_series_chart(ws, "bar", title, x_title, y_title, n_rows, data_col, cat_col, anchor, style=None)
 
 
-# --- Graphiques multi-lignes ---
+# Graphiques multi-lignes
 
 def _add_multi_line_chart(ws, title: str, x_title: str, y_title: str, anchor: str = "F2") -> None:
     """Graphique multi-lignes pour colonnes associées par paires (Temps, Cumul)."""

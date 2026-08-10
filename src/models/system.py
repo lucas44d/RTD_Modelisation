@@ -27,7 +27,7 @@ class DigestionSystem:
 
     def __init__(self,config: ExperimentConfiguration, use_stomie: bool = False, initial_stomach_volume_ml: float = 500.0, initial_preduodenum_volume_ml: float = 40.0, operating_conditions: OperatingConditions = None,):
         self.config = config
-        self.r1_stomach = StomachReactor(initial_volume_ml=initial_stomach_volume_ml)
+        self.r1_stomach = StomachReactor(config, initial_volume_ml=initial_stomach_volume_ml)
         self.r2_preduodenum = PreduodenumReactor(config, initial_volume_ml=initial_preduodenum_volume_ml)
         self.r3_duodenum = DuodenumReactor()
         self.r4_jejunum = JejunumReactor()
@@ -40,7 +40,7 @@ class DigestionSystem:
         
         #Pompes de dosage et de transfert
         self.digestive_pumps = build_digestive_solution_pumps()  
-        self.transfer_pumps = build_transfer_pumps()  
+        self.transfer_pumps = build_transfer_pumps(config)  
 
         # Conditions de fonctionnement du système IViDiS
         self.operating_conditions = operating_conditions or OperatingConditions() 
