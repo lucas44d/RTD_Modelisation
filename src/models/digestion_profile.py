@@ -10,8 +10,9 @@ from dataclasses import dataclass
 class DigestionProfile:
     profile_name : str
     reciprocating_flow : float
-    reciprocating_period : float
-    mixing_speed_R1 : float
+    reciprocating_action_duration : float
+    reciprocating_wait_duration : float
+    mixing_speed_R1 : dict
     mixing_speed_R2 : float
     emulsion_mixing_speed : float 
     emulsion_mixing_period : float 

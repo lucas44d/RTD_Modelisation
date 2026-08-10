@@ -109,14 +109,15 @@ class ReciprocatingPump(Pump):
     Le cycle complet (aspiration - attente - poussée - attente) dure donc 6 s tout au long de la digestion, indépendamment du volume.
     """
 
-    RPM = 45.0
-    ACTION_DURATION_S = 1.0
-    WAIT_DURATION_S = 2.0
-    CYCLE_DURATION_S = 2 * ACTION_DURATION_S + 2 * WAIT_DURATION_S  # 6 s
-
     def __init__(self, config : ExperimentConfiguration):
         self.config = config
         super().__init__("Pompe va-et-vient R3 (T3)")
+        self.flow_rate = config.digestion_profile.reciprocating_flow # Débit de la pompe va-et-vient (mL/min)
+
+        self.RPM = 45.0
+        self.ACTION_DURATION_S = config.digestion_profile.reciprocating_action_duration # 1 s pour aspiration ou poussée
+        self.WAIT_DURATION_S = config.digestion_profile.reciprocating_wait_duration # 2 s d'attente entre chaque action
+        self.CYCLE_DURATION_S = 2 * self.ACTION_DURATION_S + 2 * self.WAIT_DURATION_S  # 6 s
 
     def status(self, t_s: float) -> PumpStatus:
         """
@@ -286,24 +287,16 @@ def build_digestive_solution_pumps() -> dict:
         for name, rows in tables.items()
     }
  
- 
+
 """ Pompes de transfert T1 et T2 : Tableau du cahier des charges """
 # Instanciation des pompes de transfert selon le tableau du CDC
-def build_transfer_pumps() -> dict:
-    
-    tables = {
-        "T1": [
-            ("00:03:00", "00:09:00", 4, 24),
-            ("00:09:00", "01:14:00", 7, 455),
-            ("01:14:00", "01:44:00", 4, 120),
-            ("01:44:00", "02:04:00", 3, 60),
-        ],
-        "T2": [
-            ("00:18:00", "00:43:00", 9, 225),
-            ("00:43:00", "01:13:00", 7, 210),
-            ("01:13:00", "05:00:00", 5, 985),
-        ],
-    }
+def build_transfer_pumps(config) -> dict:
+    transition_flow_T1 = config.simulation_parameter.transition_flow_T1
+    transition_flow_T2 = config.simulation_parameter.transition_flow_T2
+
+    # Fusion des deux dictionnaires de segments pour T1 et T2
+    tables = transition_flow_T1 | transition_flow_T2
+
     return {
         name: FlowPump.from_hms_table(f"Pompe de transfert {name}", rows, hold_last_segment=False)
         for name, rows in tables.items()
