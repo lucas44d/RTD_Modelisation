@@ -163,7 +163,7 @@ def run_population_simulation(system: DigestionSystem, meal: MealParameter, dt_s
         if inject_meal_volume:
             inject_meal_into_stomach(system, meal, t, dt_s, meal_start_time_s=entry_time_s)
         update_tubular_reactor_volumes(system, t, dt_s)
-        #apply_tr3_volume_oscillation(system, t, dt_s)
+        apply_tr3_volume_oscillation(system, t, dt_s)
  
         for particle in particles:
             step_particle(particle, system, t, dt_s, use_corrected_by_type, reactors_by_name)

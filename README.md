@@ -45,6 +45,7 @@ dans le dossier qui accueilli votre projet exécutez cette commande  (clique dro
 ```bash
 python -m venv .venv
 ```
+Si vous êtes sur VS Code, appuyez sur ctrl+Shift+P -> Python: Select Interpreter et choississez .venv.
 
 Si vous êtes sur Spyder, vous pouvez activer l'environnement python directement sur votre logiciel :
 1. allez sur outils> preferences> Interpréteur python
