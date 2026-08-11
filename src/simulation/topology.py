@@ -18,6 +18,7 @@ from typing import Optional, List
 from src.simulation.flow import fluid_velocity_tubular
 from src.models.reactor import TubularReactor
 from src.models.system import DigestionSystem
+from src.models.pump import PumpState
 
 DEFAULT_ADDITIONAL_INFLOWS = {
     #"R1 - Estomac": ["A1.2"],
@@ -86,3 +87,27 @@ def cstr_outflow_rate(system: DigestionSystem, reactor_name: str, t_s: float) ->
     if (reactor.volume <= 0.0) and (reactor.name =="R1 - Estomac"):
         return 0.0
     return nominal
+
+def tr3_oscillating_velocity(system: DigestionSystem, reactor: TubularReactor, t_s: float) -> float:
+    """
+    Contribution de vitesse de la pompe va-et-vient T3, à ajouter à la vitesse d'advection de base (tubular_velocity_at)
+ 
+    Contrairement à T1/T2, T3 pousse puis aspire le MÊME débit pendant la même durée : le déplacement net de volume sur
+    un cycle complet est nul. C'est pourquoi cette contribution n'est pas incluse dans reactor_inflow_rate() 
+ 
+    Retourne une vitesse signée (m/s) : positive (poussée), négative (aspiration), ou 0.0 (pause, ou réacteur autre que R3)
+    
+    NOTE : La pompe de va-et-vient T3 doit aussi influencer le volume de R4 et R5 (pas encore le cas)
+    """
+    if reactor.name != "R3 - Duodénum":
+        return 0.0
+ 
+    status = system.reciprocating_pump_t3.status(t_s)
+    if status.state == PumpState.PUSHING:
+        sign = 1.0
+    elif status.state == PumpState.DRAWING:
+        sign = -1.0
+    else:
+        return 0.0
+ 
+    return sign * fluid_velocity_tubular(status.flow_rate_ml_per_min, reactor)

@@ -11,7 +11,7 @@ from src.models.system import DigestionSystem
 from src.models.particle_type import ParticleType
 from src.models.meal_parameter import MealParameter
 
-from .topology import tubular_velocity_at, cstr_outflow_rate, reactor_inflow_rate
+from .topology import tr3_oscillating_velocity, tubular_velocity_at, cstr_outflow_rate, reactor_inflow_rate
 from .particle_motion import (
     Particle,
     generate_particles_from_meal,
@@ -23,6 +23,7 @@ from .particle_motion import (
 )
 from .sedimentation import stokes_settling_velocity, is_stokes_regime_valid
 from simulation.volume_dynamics import (
+    apply_tr3_volume_oscillation,
     update_reactor_volumes,
     inject_meal_into_stomach,
     update_tubular_reactor_volumes,
@@ -105,6 +106,10 @@ def step_particle(particle: Particle, system: DigestionSystem, t: float, dt_s: f
             particle, u_m_s=u, operating_conditions=system.operating_conditions,
             dt_s=dt_s, use_corrected_velocity=use_corrected,
         )
+
+        particle.x += tr3_oscillating_velocity(system, reactor, t) * dt_s
+        particle.x = max(0.0, particle.x)  # ne peut pas reculer avant l'entrée du réacteur
+ 
  
         if has_exited_tubular_reactor(particle, reactor):
             idx = TUBULAR_CHAIN_NAMES.index(particle.current_reactor)
@@ -158,6 +163,7 @@ def run_population_simulation(system: DigestionSystem, meal: MealParameter, dt_s
         if inject_meal_volume:
             inject_meal_into_stomach(system, meal, t, dt_s, meal_start_time_s=entry_time_s)
         update_tubular_reactor_volumes(system, t, dt_s)
+        #apply_tr3_volume_oscillation(system, t, dt_s)
  
         for particle in particles:
             step_particle(particle, system, t, dt_s, use_corrected_by_type, reactors_by_name)

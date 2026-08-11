@@ -9,6 +9,7 @@ from __future__ import annotations
 from models.system import DigestionSystem
 from models.meal_parameter import MealParameter
 from simulation.topology import cstr_outflow_rate
+from src.models.pump import PumpState
 
 # Pompes de dosage qui alimentent directement R1
 R1_INFLOW_PUMPS = [ "A3", "A4", "B1", "B3"]
@@ -87,3 +88,27 @@ def update_tubular_reactor_volumes(system: DigestionSystem, t_s: float, dt_s: fl
     overflow_r5_ml = system.r5_ileon_or_stomie.add_inflow(overflow_r4_ml)
  
     return overflow_r5_ml
+
+
+def apply_tr3_volume_oscillation(system: DigestionSystem, t_s: float, dt_s: float) -> None:
+    """
+    Fait osciller le volume affiché (current_volume_ml) de R3 selon la phase de la pompe va-et-vient T3. uniquement pour l'affichage, 
+    sans modifier le bilan de volume global du système.
+ 
+    IMPORTANT : contrairement à update_tubular_reactor_volumes() (T1/T2), cette oscillation est nulle sur un cycle complet 
+    (T3 pousse puis aspire le même débit pendant la même durée)
+
+    NOTE : La pompe de va-et-vient T3 doit aussi influencer le volume de R4 et R5 (pas encore le cas)
+    """
+    status = system.reciprocating_pump_t3.status(t_s)
+    if status.state == PumpState.PUSHING:
+        sign = 1.0
+    elif status.state == PumpState.DRAWING:
+        sign = -1.0
+    else:
+        return
+ 
+    delta_ml = sign * status.flow_rate_ml_per_min / 60.0 * dt_s
+    reactor = system.r3_duodenum
+    new_volume = reactor.current_volume_ml + delta_ml
+    reactor.current_volume_ml = max(0.0, min(reactor.volume, new_volume))
