@@ -156,14 +156,12 @@ def run_population_simulation(system: DigestionSystem, meal: MealParameter, dt_s
         t += dt_s
  
         # Mise à jour des volumes de R1/R2 (bilan de matière), et
-        # remplissage en cascade de R3->R4->R5 (poussé par R1/R2), UNE
-        # FOIS par pas de temps (pas par particule) — cf.
-        # simulation/volume_dynamics.py.
+        # remplissage en cascade de R3->R4->R5 (poussé par R1/R2), une fois par pas de temps (pas par particule) 
         update_reactor_volumes(system, t, dt_s)
         if inject_meal_volume:
             inject_meal_into_stomach(system, meal, t, dt_s, meal_start_time_s=entry_time_s)
         update_tubular_reactor_volumes(system, t, dt_s)
-        #apply_tr3_volume_oscillation(system, t, dt_s)
+        apply_tr3_volume_oscillation(system, t, dt_s)
  
         for particle in particles:
             step_particle(particle, system, t, dt_s, use_corrected_by_type, reactors_by_name)

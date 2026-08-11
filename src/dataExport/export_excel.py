@@ -79,7 +79,7 @@ def _group_summary_to_dataframe(particles: List[Particle]) -> pd.DataFrame:
 #
 def _cumulative_by_group_to_dataframe(particles: List[Particle]) -> pd.DataFrame:
     """
-    Génère un DataFrame avec les courbes de sorties cumulées pour chaque groupe (densité/taille).
+    Génère un DataFrame avec les courbes de sorties cumulées pour chaque groupe (densité/taille)
     """
 
     groups = group_particles_by_type(particles)
