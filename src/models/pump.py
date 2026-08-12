@@ -127,17 +127,17 @@ class ReciprocatingPump(Pump):
         t_in_cycle = t_s % self.CYCLE_DURATION_S
 
         if t_in_cycle < self.ACTION_DURATION_S:
-            return PumpStatus(PumpState.DRAWING)
+            return PumpStatus(PumpState.DRAWING, self.flow_rate)
         t_in_cycle -= self.ACTION_DURATION_S
 
         if t_in_cycle < self.WAIT_DURATION_S:
-            return PumpStatus(PumpState.PAUSED)
+            return PumpStatus(PumpState.PAUSED, 0.0)
         t_in_cycle -= self.WAIT_DURATION_S
 
         if t_in_cycle < self.ACTION_DURATION_S:
-            return PumpStatus(PumpState.PUSHING)
+            return PumpStatus(PumpState.PUSHING, self.flow_rate)
 
-        return PumpStatus(PumpState.PAUSED)
+        return PumpStatus(PumpState.PAUSED, 0.0)
     
 """Heures, minutes et secondes en secondes"""
 def hms_to_seconds(hms: str) -> float:

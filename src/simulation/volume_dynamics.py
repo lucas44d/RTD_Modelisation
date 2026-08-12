@@ -110,5 +110,9 @@ def apply_tr3_volume_oscillation(system: DigestionSystem, t_s: float, dt_s: floa
  
     delta_ml = sign * status.flow_rate_ml_per_min / 60.0 * dt_s
     reactor = system.r3_duodenum
+
+    if reactor.current_volume_ml == 0.0 :
+       return  # Si le volume du réacteur est nul, alors on ne peut pas aspirer/pousser du fluide
+    
     new_volume = reactor.current_volume_ml + delta_ml
     reactor.current_volume_ml = max(0.0, min(reactor.volume, new_volume))
