@@ -100,19 +100,10 @@ def apply_tr3_volume_oscillation(system: DigestionSystem, t_s: float, dt_s: floa
 
     NOTE : La pompe de va-et-vient T3 doit aussi influencer le volume de R4 et R5 (pas encore le cas)
     """
-    status = system.reciprocating_pump_t3.status(t_s)
-    if status.state == PumpState.PUSHING:
-        sign = 1.0
-    elif status.state == PumpState.DRAWING:
-        sign = -1.0
-    else:
+    net_ml = system.reciprocating_pump_t3.net_signed_volume_ml(t_s, dt_s)
+    if net_ml == 0.0:
         return
  
-    delta_ml = sign * status.flow_rate_ml_per_min / 60.0 * dt_s
-    reactor = system.r3_duodenum
-
-    if reactor.current_volume_ml == 0.0 :
-       return  # Si le volume du réacteur est nul, alors on ne peut pas aspirer/pousser du fluide
-    
-    new_volume = reactor.current_volume_ml + delta_ml
-    reactor.current_volume_ml = max(0.0, min(reactor.volume, new_volume))
+    for reactor in (system.r3_duodenum, system.r4_jejunum, system.r5_ileon_or_stomie):
+        new_volume = reactor.current_volume_ml + net_ml
+        reactor.current_volume_ml = max(0.0, min(reactor.volume, new_volume))
