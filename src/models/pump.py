@@ -117,6 +117,8 @@ class ReciprocatingPump(Pump):
         self.RPM = 45.0
         self.ACTION_DURATION_S = config.digestion_profile.reciprocating_action_duration # 1 s pour aspiration ou poussée
         self.WAIT_DURATION_S = config.digestion_profile.reciprocating_wait_duration # 2 s d'attente entre chaque action
+
+        #Durée totale d'un cycle complet (aspiration + pause + poussée + pause) en secondes
         self.CYCLE_DURATION_S = 2 * self.ACTION_DURATION_S + 2 * self.WAIT_DURATION_S  # 6 s
 
     def status(self, t_s: float) -> PumpStatus:
@@ -127,17 +129,55 @@ class ReciprocatingPump(Pump):
         t_in_cycle = t_s % self.CYCLE_DURATION_S
 
         if t_in_cycle < self.ACTION_DURATION_S:
-            return PumpStatus(PumpState.DRAWING)
+            return PumpStatus(PumpState.DRAWING, self.flow_rate)
         t_in_cycle -= self.ACTION_DURATION_S
 
         if t_in_cycle < self.WAIT_DURATION_S:
-            return PumpStatus(PumpState.PAUSED)
+            return PumpStatus(PumpState.PAUSED, 0.0)
         t_in_cycle -= self.WAIT_DURATION_S
 
         if t_in_cycle < self.ACTION_DURATION_S:
-            return PumpStatus(PumpState.PUSHING)
+            return PumpStatus(PumpState.PUSHING, self.flow_rate)
 
-        return PumpStatus(PumpState.PAUSED)
+        return PumpStatus(PumpState.PAUSED, 0.0)
+
+    def _periodic_overlap_s(self, t_start_s: float, t_end_s: float, phase_start_s: float, phase_duration_s: float) -> float:
+        """
+        Durée totale (s) de chevauchement entre l'intervalle [t_start_s, t_end_s] et les occurrences périodiques
+        de la fenêtre [phase_start_s, phase_start_s + phase_duration_s]
+        """
+        period = self.CYCLE_DURATION_S
+        total = 0.0
+        k_start = int((t_start_s - phase_start_s) // period) - 1
+        k_end = int((t_end_s - phase_start_s) // period) + 1
+        for k in range(k_start, k_end + 1):
+            seg_start = k * period + phase_start_s
+            seg_end = seg_start + phase_duration_s
+            overlap_start = max(t_start_s, seg_start)
+            overlap_end = min(t_end_s, seg_end)
+            if overlap_end > overlap_start:
+                total += overlap_end - overlap_start
+        return total
+ 
+    def net_signed_volume_ml(self, t_start_s: float, dt_s: float) -> float:
+        """
+        Volume net signé (mL) déplacé par T3 sur l'intervalle
+        [t_start_s, t_start_s + dt_s) : positif si poussée, négatif si aspiration, nul sur un cycle complet.
+ 
+        Intègre exactement la fraction de temps réellement passée dans chaque phase (aspiration/poussée) sur l'intervalle, plutôt que
+        d'échantillonner status(t) à un seul instant et multiplier par dt_s en entier
+        
+        Cette méthode reste exacte quel que soit dt_s, y compris pour un intervalle couvrant
+        plusieurs cycles complets (le résultat tend alors vers 0, comme physiquement attendu).
+        """
+        t_end_s = t_start_s + dt_s
+        draw_duration_s = self._periodic_overlap_s(t_start_s, t_end_s, 0.0, self.ACTION_DURATION_S)
+        push_start_s = self.ACTION_DURATION_S + self.WAIT_DURATION_S
+        push_duration_s = self._periodic_overlap_s(t_start_s, t_end_s, push_start_s, self.ACTION_DURATION_S)
+ 
+        rate_ml_s = self.flow_rate / 60.0
+        return rate_ml_s * (push_duration_s - draw_duration_s)
+
     
 """Heures, minutes et secondes en secondes"""
 def hms_to_seconds(hms: str) -> float:

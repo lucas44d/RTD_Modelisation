@@ -11,7 +11,7 @@ from src.models.system import DigestionSystem
 from src.models.particle_type import ParticleType
 from src.models.meal_parameter import MealParameter
 
-from .topology import tr3_oscillating_velocity, tubular_velocity_at, cstr_outflow_rate, reactor_inflow_rate
+from .topology import tr3_position_delta_m, tubular_velocity_at, cstr_outflow_rate, reactor_inflow_rate
 from .particle_motion import (
     Particle,
     generate_particles_from_meal,
@@ -107,7 +107,7 @@ def step_particle(particle: Particle, system: DigestionSystem, t: float, dt_s: f
             dt_s=dt_s, use_corrected_velocity=use_corrected,
         )
 
-        particle.x += tr3_oscillating_velocity(system, reactor, t) * dt_s
+        particle.x += tr3_position_delta_m(system, reactor, t, dt_s)
         particle.x = max(0.0, particle.x)  # ne peut pas reculer avant l'entrée du réacteur
  
  

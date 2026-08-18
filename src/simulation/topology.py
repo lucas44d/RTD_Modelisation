@@ -15,10 +15,10 @@ Topologie confirmée par le PID :
 from __future__ import annotations
 from typing import Optional, List
 
-from src.simulation.flow import fluid_velocity_tubular
+from src.simulation.flow import fluid_velocity_tubular, cross_section_area_m2
 from src.models.reactor import TubularReactor
 from src.models.system import DigestionSystem
-from src.models.pump import PumpState
+
 
 DEFAULT_ADDITIONAL_INFLOWS = {
     #"R1 - Estomac": ["A1.2"],
@@ -88,26 +88,23 @@ def cstr_outflow_rate(system: DigestionSystem, reactor_name: str, t_s: float) ->
         return 0.0
     return nominal
 
-def tr3_oscillating_velocity(system: DigestionSystem, reactor: TubularReactor, t_s: float) -> float:
+def tr3_position_delta_m(system: DigestionSystem, reactor: TubularReactor, t_s: float, dt_s: float) -> float:
     """
-    Contribution de vitesse de la pompe va-et-vient T3, à ajouter à la vitesse d'advection de base (tubular_velocity_at)
+    Déplacement signé (m) dû à la pompe va-et-vient T3 sur l'intervalle [t_s, t_s + dt_s]
  
-    Contrairement à T1/T2, T3 pousse puis aspire le MÊME débit pendant la même durée : le déplacement net de volume sur
-    un cycle complet est nul. C'est pourquoi cette contribution n'est pas incluse dans reactor_inflow_rate() 
- 
-    Retourne une vitesse signée (m/s) : positive (poussée), négative (aspiration), ou 0.0 (pause, ou réacteur autre que R3)
+    Utilise ReciprocatingPump.net_signed_volume_ml(), qui intègre le temps passé dans chaque phase sur l'intervalle demandé;
+    contrairement à un échantillonnage instantané de status(t_s) multiplié par dt_s, qui serait faux dès que dt_s diffère de 1 s
     
-    NOTE : La pompe de va-et-vient T3 doit aussi influencer le volume de R4 et R5 (pas encore le cas)
+    Retourne un déplacement signé (m) : positif (poussée), négatif (aspiration), 
+    ou 0.0 (pause, plusieurs cycles complets, ou réacteur autre que R3).
     """
     if reactor.name != "R3 - Duodénum":
         return 0.0
  
-    status = system.reciprocating_pump_t3.status(t_s)
-    if status.state == PumpState.PUSHING:
-        sign = 1.0
-    elif status.state == PumpState.DRAWING:
-        sign = -1.0
-    else:
+    net_ml = system.reciprocating_pump_t3.net_signed_volume_ml(t_s, dt_s)
+    if net_ml == 0.0:
         return 0.0
  
-    return sign * fluid_velocity_tubular(status.flow_rate_ml_per_min, reactor)
+    area_m2 = cross_section_area_m2(reactor.inner_diameter_in)
+    net_m3 = net_ml * 1e-6
+    return net_m3 / area_m2

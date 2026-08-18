@@ -9,7 +9,7 @@ import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.styles import Font, Alignment
 from openpyxl.utils import get_column_letter
-from openpyxl.chart import LineChart, BarChart, Reference
+from openpyxl.chart import LineChart, BarChart, Reference, ScatterChart, Series
 from openpyxl.chart.layout import Layout, ManualLayout
 from openpyxl.drawing.text import Paragraph, ParagraphProperties, CharacterProperties
 from openpyxl.chart.text import RichText
@@ -119,15 +119,12 @@ def _distribution_dataframes(particles: List[Particle], n_bins: int = 30) -> Dic
 #Construction de la DataFrame du suivi des volumes 
 def _volume_history_to_dataframe(volume_history: Dict[str, List[float]]) -> pd.DataFrame:
     df = pd.DataFrame(volume_history)
-    
-    if "t" in df.columns:
-        df["temps_min"] = df["t"] / 60.0
-        df = df.drop(columns=["t"])  # supprime la colonne originale (temps en secondes)
 
-        #Placement de la colonne "temps_min" en première position
-        other_cols = [col for col in df.columns if col != 'temps_min']
-        df = df[['temps_min'] + other_cols]
-        
+    if "t" in df.columns:
+        # On divise les valeurs de 't' par 60
+        df["t"] = df["t"] / 60.0
+        df = df.rename(columns={"t": "temps_min"})
+
     return df
 
 
@@ -260,25 +257,30 @@ def _add_bar_chart_active(ws, title: str, x_title: str, y_title: str, n_rows: in
 
 
 # Graphiques multi-lignes
-
 def _add_multi_line_chart(ws, title: str, x_title: str, y_title: str, anchor: str = "F2") -> None:
     """Graphique multi-lignes pour colonnes associées par paires (Temps, Cumul)."""
     if ws.max_row < 2 or ws.max_column < 2:
         return
 
-    chart = _create_base_chart(LineChart, title, x_title, y_title)
+    chart = _create_base_chart(ScatterChart, title, x_title, y_title)
     n_rows, n_cols = ws.max_row, ws.max_column
 
     for idx, col in enumerate(range(1, n_cols, 2)):
         time_col, data_col = col, col + 1
 
-        data = Reference(ws, min_col=data_col, max_col=data_col, min_row=1, max_row=n_rows)
-        cats = Reference(ws, min_col=time_col, min_row=2, max_row=n_rows)
+        y_values = Reference(
+            ws, min_col=data_col, max_col=data_col, min_row=1, max_row=n_rows
+        )
+        x_values = Reference(
+            ws, min_col=time_col, min_row=2, max_row=n_rows
+        )
 
-        chart.add_data(data, titles_from_data=True)
-        chart.set_categories(cats)
+        series = Series(
+            y_values, xvalues=x_values, title_from_data=True
+        )  
 
-        _style_series_line(chart.series[-1], COLOR_PALETTE[idx % len(COLOR_PALETTE)])
+        _style_series_line(series, COLOR_PALETTE[idx % len(COLOR_PALETTE)])
+        chart.series.append(series)
 
     ws.add_chart(chart, anchor)
 
